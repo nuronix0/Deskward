@@ -1,0 +1,15 @@
+<resources>
+    <!-- Base application theme — must extend an AppCompat/Material theme for XML compatibility -->
+    <style name="Theme.HomePort" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowBackground">@color/ic_launcher_background</item>
+    </style>
+
+    <!-- Splash screen theme -->
+    <style name="Theme.HomePort.Splash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">#000000</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_launcher_foreground</item>
+        <item name="postSplashScreenTheme">@style/Theme.HomePort</item>
+    </style>
+</resources>

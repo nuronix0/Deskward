@@ -1,0 +1,5 @@
+{
+  "app": "HOMEPORT",
+  "version": "1.0.0",
+  "peerRouting": "direct_p2p"
+}

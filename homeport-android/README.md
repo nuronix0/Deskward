@@ -1,20 +1,12 @@
-<p align="center">
-  <img src="deskward_logo.png" width="120" height="120" alt="Deskward Logo" />
-</p>
+# ⚡ DESKWARD (formerly HomePort)
 
-<h1 align="center">⚡ DESKWARD</h1>
+> **Zero-Cloud, High-Speed Hardware Bridge & Local Mesh File Transfer Ecosystem for Android & Desktop**
 
-<p align="center">
-  <b>Zero-Cloud, High-Speed Hardware Bridge & Local Mesh File Transfer Ecosystem for Android & Desktop</b>
-</p>
-
-<p align="center">
-  <a href="https://developer.android.com"><img src="https://img.shields.io/badge/Platform-Android%208.0%2B%20(API%2026--35)-green?style=flat-square&logo=android" alt="Platform" /></a>
-  <a href="https://kotlinlang.org"><img src="https://img.shields.io/badge/Language-Kotlin%202.0-purple?style=flat-square&logo=kotlin" alt="Language" /></a>
-  <a href="https://developer.android.com/jetpack/compose"><img src="https://img.shields.io/badge/UI-Jetpack%20Compose-blue?style=flat-square&logo=jetpackcompose" alt="UI" /></a>
-  <a href="https://en.wikipedia.org/wiki/Air_gap_(networking)"><img src="https://img.shields.io/badge/Security-Air--Gapped%20%7C%20TLS%201.3-emerald?style=flat-square" alt="Security" /></a>
-  <img src="https://img.shields.io/badge/Speed-100%2B%20MB%2Fs%20Local-yellow?style=flat-square" alt="Speed" />
-</p>
+[![Platform](https://img.shields.io/badge/Platform-Android%208.0%2B%20(API%2026--35)-green?style=flat-square&logo=android)](https://developer.android.com)
+[![Language](https://img.shields.io/badge/Language-Kotlin%202.0-purple?style=flat-square&logo=kotlin)](https://kotlinlang.org)
+[![UI Framework](https://img.shields.io/badge/UI-Jetpack%20Compose-blue?style=flat-square&logo=jetpackcompose)](https://developer.android.com/jetpack/compose)
+[![Security](https://img.shields.io/badge/Security-Air--Gapped%20%7C%20TLS%201.3-emerald?style=flat-square)](https://en.wikipedia.org/wiki/Air_gap_(networking))
+[![Speed](https://img.shields.io/badge/Speed-100%2B%20MB%2Fs%20Local-yellow?style=flat-square)](https://github.com)
 
 ---
 

@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "448678937570",
+    "firebase_url": "https://deskward10-default-rtdb.firebaseio.com",
+    "project_id": "deskward10",
+    "storage_bucket": "deskward10.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:448678937570:android:bb68eb6131e954b38defbb",
+        "android_client_info": {
+          "package_name": "com.homeport.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAw5RSdxeWdbklEZ7Z6hyf7hFMBnv7f0tQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>HomePort WebRTC Agent</title>
+</head>
+<body>
+<script>
+'use strict';
+
+const { ipcRenderer } = require('electron');
+
+// ── Firebase config (deskward10 project) ─────────────────────
+const FIREBASE_CONFIG = {
+  apiKey:            "AIzaSyBKdp85ClFsBWtaaKY1D4g7Hr7Y_a0eJok",
+  authDomain:        "deskward10.firebaseapp.com",
+  databaseURL:       "https://deskward10-default-rtdb.firebaseio.com",
+  projectId:         "deskward10",
+  storageBucket:     "deskward10.firebasestorage.app",
+  messagingSenderId: "448678937570",
+  appId:             "1:448678937570:web:302ef022a1e9ae9e8defbb"
+};
+
+const ROOMS = 'homeport_rooms';
+const RTC_CONFIG = {
+  iceServers: [
+    { urls: 'stun:stun.l.google.com:19302' },
+    { urls: 'stun:stun1.l.google.com:19302' },
+    { urls: 'stun:stun2.l.google.com:19302' },
+    { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' },
+    { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' },
+    { urls: 'turn:openrelay.metered.ca:443?transport=tcp', username: 'openrelayproject', credential: 'openrelayproject' }
+  ]
+};
+
+let fb = null;
+const activeSessions = new Map();
+const listeningKeys = new Set();
+
+function initFirebase() {
+  try {
+    const { initializeApp } = require('firebase/app');
+    const { getDatabase, ref, set, get, push, onValue, remove, off } = require('firebase/database');
+    const app = initializeApp(FIREBASE_CONFIG);
+    const db  = getDatabase(app);
+    fb = { db, ref, set, get, push, onValue, remove, off };
+    console.log('[WebRTC-Agent] Firebase initialized via CommonJS');
+    ipcRenderer.send('webrtc-agent-ready');
+  } catch (err) {
+    console.warn('[WebRTC-Agent] CommonJS load failed, trying ESM import:', err);
+    Promise.all([
+      import('firebase/app'),
+      import('firebase/database')
+    ]).then(([appMod, dbMod]) => {
+      const app = appMod.initializeApp(FIREBASE_CONFIG);
+      const db  = dbMod.getDatabase(app);
+      fb = {
+        db,
+        ref: dbMod.ref,
+        set: dbMod.set,
+        get: dbMod.get,
+        push: dbMod.push,
+        onValue: dbMod.onValue,
+        remove: dbMod.remove,
+        off: dbMod.off
+      };
+      console.log('[WebRTC-Agent] Firebase initialized via ESM');
+      ipcRenderer.send('webrtc-agent-ready');
+    }).catch(e => {
+      console.error('[WebRTC-Agent] Failed to initialize Firebase:', e);
+    });
+  }
+}
+
+initFirebase();
+
+// ── Listen on a room key (e.g. 6-digit pairing code or desktop deviceId) ──
+ipcRenderer.on('webrtc-listen', (_e, { key }) => {
+  console.log('[WebRTC-Agent] webrtc-listen received for:', key);
+  if (!fb || listeningKeys.has(key)) return;
+  listeningKeys.add(key);
+  console.log('[WebRTC-Agent] Listening for WebRTC offer on room:', key);
+
+  const offerRef = fb.ref(fb.db, `${ROOMS}/${key}/offer`);
+  fb.onValue(offerRef, async (snap) => {
+    const offer = snap.val();
+    if (!offer || !offer.sdp) return;
+    
+    // Check if session already active
+    if (activeSessions.has(key)) {
+      const s = activeSessions.get(key);
+      if (s.pc && (s.pc.connectionState === 'connected' || s.pc.connectionState === 'connecting')) {
+        return;
+      }
+    }
+
+    console.log('[WebRTC-Agent] Received offer on room:', key);
+    await handleOffer(key, offer);
+  });
+});
+
+async function handleOffer(key, offerData) {
+  try {
+    const pc = new RTCPeerConnection(RTC_CONFIG);
+    const session = { pc, dc: null, key, offerRef: null, iceRef: null };
+    activeSessions.set(key, session);
+
+    // Relay local ICE candidates to Firebase
+    pc.onicecandidate = async (e) => {
+      if (e.candidate && fb) {
+        try {
+          await fb.push(
+            fb.ref(fb.db, `${ROOMS}/${key}/answer_candidates`),
+            {
+              candidate:     e.candidate.candidate,
+              sdpMid:        e.candidate.sdpMid,
+              sdpMLineIndex: e.candidate.sdpMLineIndex
+            }
+          );
+        } catch (err) {
+          console.error('[WebRTC-Agent] Failed to push ICE candidate:', err);
+        }
+      }
+    };
+
+    pc.onconnectionstatechange = () => {
+      console.log(`[WebRTC-Agent] Connection state for ${key}:`, pc.connectionState);
+      ipcRenderer.send('webrtc-connection-state', { key, state: pc.connectionState });
+      if (pc.connectionState === 'failed' || pc.connectionState === 'disconnected') {
+        cleanupSession(key);
+      }
+    };
+
+    // When the remote peer creates a DataChannel
+    pc.ondatachannel = (event) => {
+      const dc = event.channel;
+      session.dc = dc;
+      setupDataChannel(key, dc);
+    };
+
+    // Set remote SDP offer
+    await pc.setRemoteDescription(new RTCSessionDescription(offerData));
+
+    // Create SDP answer
+    const answer = await pc.createAnswer();
+    await pc.setLocalDescription(answer);
+
+    // Write answer to Firebase
+    await fb.set(
+      fb.ref(fb.db, `${ROOMS}/${key}/answer`),
+      { sdp: answer.sdp, type: answer.type }
+    );
+    console.log('[WebRTC-Agent] Answer sent for room:', key);
+
+    // Listen for remote ICE candidates
+    const icePath = fb.ref(fb.db, `${ROOMS}/${key}/offer_candidates`);
+    session.iceRef = icePath;
+    fb.onValue(icePath, snap => {
+      const candidates = snap.val();
+      if (!candidates) return;
+      Object.values(candidates).forEach(c => {
+        try {
+          pc.addIceCandidate(new RTCIceCandidate({
+            candidate:     c.candidate,
+            sdpMid:        c.sdpMid,
+            sdpMLineIndex: c.sdpMLineIndex
+          }));
+        } catch (_) {}
+      });
+    });
+
+  } catch (err) {
+    console.error(`[WebRTC-Agent] Error handling offer for ${key}:`, err, err.stack, err.message);
+    cleanupSession(key);
+  }
+}
+
+function setupDataChannel(key, channel) {
+  channel.onopen = () => {
+    console.log('[WebRTC-Agent] DataChannel OPEN for', key);
+    ipcRenderer.send('webrtc-datachannel-open', { key });
+
+    // Clean up signaling room to keep Firebase database tiny and free
+    if (fb) {
+      setTimeout(() => {
+        fb.remove(fb.ref(fb.db, `${ROOMS}/${key}`)).catch(() => {});
+      }, 5000);
+    }
+  };
+
+  channel.onmessage = (e) => {
+    ipcRenderer.send('webrtc-dc-message', { key, data: e.data });
+  };
+
+  channel.onclose = () => {
+    console.log('[WebRTC-Agent] DataChannel closed for', key);
+    ipcRenderer.send('webrtc-datachannel-closed', { key });
+    cleanupSession(key);
+  };
+
+  channel.onerror = (err) => {
+    console.error('[WebRTC-Agent] DataChannel error for', key, err);
+  };
+}
+
+// ── Outgoing data from main process to WebRTC DataChannel ──
+ipcRenderer.on('webrtc-dc-send', (_e, { key, data }) => {
+  const session = activeSessions.get(key);
+  if (session && session.dc && session.dc.readyState === 'open') {
+    session.dc.send(data);
+  }
+});
+
+// ── Close connection from main process ──
+ipcRenderer.on('webrtc-dc-close', (_e, { key }) => {
+  cleanupSession(key);
+});
+
+function cleanupSession(key) {
+  const session = activeSessions.get(key);
+  if (session) {
+    if (session.dc) {
+      try { session.dc.close(); } catch (_) {}
+    }
+    if (session.pc) {
+      try { session.pc.close(); } catch (_) {}
+    }
+    activeSessions.delete(key);
+  }
+}
+</script>
+</body>
+</html>

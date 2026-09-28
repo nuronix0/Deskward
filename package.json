@@ -1,0 +1,11 @@
+{
+  "name": "homeport",
+  "version": "1.0.0",
+  "private": true,
+  "description": "DESKWARD - Peer-to-peer mesh file sharing network",
+  "scripts": {
+    "dev": "npm --prefix homeport-desktop run dev",
+    "build": "npm --prefix homeport-desktop run build",
+    "start": "npm --prefix homeport-desktop start"
+  }
+}

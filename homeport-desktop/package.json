@@ -1,0 +1,50 @@
+{
+  "name": "homeport-desktop",
+  "productName": "DESKWARD",
+  "version": "1.0.0",
+  "description": "DESKWARD — Cross-device private P2P file network (Desktop)",
+  "main": "dist/main/main.js",
+  "scripts": {
+    "dev": "concurrently \"tsc -w --project tsconfig.main.json\" \"tsc -w --project tsconfig.renderer.json\" \"wait-on dist/main/main.js && electron .\"",
+    "build": "tsc --project tsconfig.main.json && tsc --project tsconfig.renderer.json",
+    "start": "npm run build && electron .",
+    "pack": "npm run build && electron-builder --win"
+  },
+  "keywords": [
+    "deskward",
+    "homeport",
+    "p2p",
+    "filesharing",
+    "electron"
+  ],
+  "author": "DESKWARD Team",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "concurrently": "^9.0.0",
+    "electron": "^32.0.0",
+    "electron-builder": "^25.0.0",
+    "typescript": "^5.5.0",
+    "wait-on": "^8.0.0"
+  },
+  "dependencies": {
+    "@types/ws": "^8.18.1",
+    "electron-store": "^10.0.0",
+    "electron-updater": "^6.3.0",
+    "firebase": "^12.19.0",
+    "qrcode": "^1.5.4",
+    "ws": "^8.21.3"
+  },
+  "build": {
+    "appId": "com.homeport.desktop",
+    "productName": "HOMEPORT",
+    "win": {
+      "target": "nsis",
+      "icon": "assets/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
+  }
+}
