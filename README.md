@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="deskward_logo.png" width="120" height="120" alt="Deskward Logo" />
+  <img src="portal_logo.png" width="120" height="120" alt="Portal Logo" style="border-radius: 28px;" />
 </p>
 
-<h1 align="center">⚡ DESKWARD</h1>
+<h1 align="center">⚡ PORTAL</h1>
 
 <p align="center">
   <b>Zero-Cloud, High-Speed Hardware Bridge & Local Mesh File Transfer Ecosystem for Android & Desktop</b>
@@ -10,10 +10,12 @@
 
 <p align="center">
   <a href="https://developer.android.com"><img src="https://img.shields.io/badge/Platform-Android%208.0%2B%20(API%2026--35)-green?style=flat-square&logo=android" alt="Platform" /></a>
-  <a href="https://kotlinlang.org"><img src="https://img.shields.io/badge/Language-Kotlin%202.0-purple?style=flat-square&logo=kotlin" alt="Language" /></a>
-  <a href="https://developer.android.com/jetpack/compose"><img src="https://img.shields.io/badge/UI-Jetpack%20Compose-blue?style=flat-square&logo=jetpackcompose" alt="UI" /></a>
-  <a href="https://en.wikipedia.org/wiki/Air_gap_(networking)"><img src="https://img.shields.io/badge/Security-Air--Gapped%20%7C%20TLS%201.3-emerald?style=flat-square" alt="Security" /></a>
+  <a href="https://www.electronjs.org"><img src="https://img.shields.io/badge/Desktop-Electron%20%7C%20Windows%20%7C%20macOS%20%7C%20Linux-47848F?style=flat-square&logo=electron" alt="Desktop" /></a>
+  <a href="https://kotlinlang.org"><img src="https://img.shields.io/badge/Language-Kotlin%202.0%20%7C%20TypeScript-purple?style=flat-square&logo=kotlin" alt="Language" /></a>
+  <a href="https://developer.android.com/jetpack/compose"><img src="https://img.shields.io/badge/UI-Jetpack%20Compose%20%7C%20Glassmorphism-blue?style=flat-square&logo=jetpackcompose" alt="UI" /></a>
+  <a href="https://en.wikipedia.org/wiki/Air_gap_(networking)"><img src="https://img.shields.io/badge/Security-Air--Gapped%20%7C%20NFC%20Tap-emerald?style=flat-square" alt="Security" /></a>
   <img src="https://img.shields.io/badge/Speed-100%2B%20MB%2Fs%20Local-yellow?style=flat-square" alt="Speed" />
+  <a href="Portal.apk"><img src="https://img.shields.io/badge/Download-Portal.apk%20(Release)-orange?style=flat-square&logo=android" alt="Download APK" /></a>
 </p>
 
 ---
@@ -33,9 +35,9 @@
 
 ## 🌟 Overview
 
-**Deskward** is an ultra-fast, completely air-gapped cross-device file sharing and synchronization platform engineered specifically for local networks. By establishing direct peer-to-peer TCP streams over Wi-Fi and local mesh configurations, Deskward eliminates cloud servers, file size ceilings, bandwidth throttling, and privacy vulnerabilities.
+**Portal** is an ultra-fast, completely air-gapped cross-device file sharing and synchronization platform engineered specifically for local networks and hardware bridges. By establishing direct peer-to-peer TCP streams over Wi-Fi, local mesh configurations, and instant NFC touch handshakes, Portal eliminates cloud servers, file size ceilings, bandwidth throttling, and privacy vulnerabilities.
 
-Built from the ground up using **Kotlin** and **100% Jetpack Compose**, Deskward pairs raw hardware-level throughput with an Apple-grade cyber aesthetic featuring dynamic interactive pills, ambient haptics, and live progress indicators.
+Built from the ground up using **Kotlin** and **100% Jetpack Compose** on Android, paired with an **Electron & TypeScript** desktop hub, Portal unites raw hardware-level throughput with a cyber aesthetic featuring fluid interactive Dynamic Islands, ambient haptics, and live progress indicators.
 
 ---
 
@@ -43,7 +45,7 @@ Built from the ground up using **Kotlin** and **100% Jetpack Compose**, Deskward
 
 1. **True Air-Gapped Privacy**: Guarantee that zero bytes of user data, metadata, or telemetry ever traverse external cloud services or third-party relays.
 2. **Maximum Local Bandwidth Utilization**: Saturate available local Wi-Fi 5/6/6E bandwidth with chunked pipeline streaming, reaching sustainable transfer rates upwards of **100+ MB/s**.
-3. **Zero Configuration Friction**: Facilitate instant hardware-to-hardware discovery via mDNS / Network Service Discovery (NSD) and quick cryptographic QR pairing.
+3. **Zero Configuration Friction**: Facilitate instant hardware-to-hardware discovery via mDNS / Network Service Discovery (NSD), quick NFC tap-to-pair, and cryptographic QR pairing.
 4. **State-of-the-Art UX**: Deliver a futuristic, responsive mobile experience powered by custom Dynamic Island HUDs, hardware-accelerated document previewers, and procedural sound design.
 
 ---
@@ -55,10 +57,15 @@ Built from the ground up using **Kotlin** and **100% Jetpack Compose**, Deskward
 - **Direct P2P Sockets**: Raw non-blocking TCP socket engine with full 64KB pipelined buffer streaming for maximum IO efficiency.
 - **Bi-Directional Transfer**: Seamlessly send and receive individual files, batches, documents, or entire media folders between any paired hardware.
 
+### 📲 NFC Tap-to-Share & Instant Handshake
+- **Host Card Emulation (HCE)**: Custom APDU service enabling Android devices to emulate smart pairing tokens.
+- **NDEF & Beam-Free Pairing**: Instant connection establishment simply by holding two devices back-to-back.
+- **Auto-Launch from Cold Start**: Automatically opens Portal and begins transferring immediately upon physical contact.
+
 ### 🏝️ Dynamic Smart Island (HUD)
 - **Fluid Morphing States**: Adapts seamlessly between **Idle**, **Connecting**, **Connected**, **Transferring**, and **Success** states.
 - **Real-Time Progress & Speed**: Live percentage tracking, animated progress ring, instantaneous transfer throughput (MB/s), and remaining time estimation.
-- **Smart Reversion**: Automatically collapses into a compact connected badge after 3–5 seconds of completed activity, confirming ongoing mesh link health.
+- **Smart Reversion**: Automatically collapses into a compact connected badge after activity completes, confirming ongoing mesh link health.
 
 ### 📄 Universal File Preview Engine
 - **In-App PDF Reader**: High-fidelity PDF rendering using Android's native `PdfRenderer`, with page-by-page caching, hardware-accelerated canvas fills, and `%PDF-` magic header verification.
@@ -82,6 +89,7 @@ graph TD
     
     subgraph Network Core
         MESH --> NSD[mDNS / NSD Discovery]
+        MESH --> NFC[NFC HCE & NDEF Manager]
         MESH --> SOCK[Raw Non-Blocking TCP Sockets]
         SOCK --> BUF[Chunked Stream Pipeline 64KB]
         BUF --> DISK[Atomic File Staging: .downloading -> Rename]
@@ -89,7 +97,7 @@ graph TD
     
     subgraph UI Engine
         CTRL --> HUD[Smart Dynamic Island HUD]
-        UI --> PREV[PdfRenderer / ExoPlayer Preview Engine]
+        UI --> PREV[PdfRenderer / MediaPlayer Preview Engine]
         UI --> THEME[Cyber Deep Black & Volt Palette]
     end
 ```
@@ -97,10 +105,13 @@ graph TD
 ### Tech Stack
 | Component | Technology |
 |---|---|
-| **Language** | Kotlin 2.0+ (Coroutines, StateFlow, Channels) |
-| **UI Framework** | Jetpack Compose (Material 3, Custom Canvas Shaders) |
+| **Language (Android)** | Kotlin 2.0+ (Coroutines, StateFlow, Channels) |
+| **Language (Desktop)** | TypeScript / Node.js (Electron runtime) |
+| **UI Framework (Android)** | Jetpack Compose (Material 3, Custom Canvas Shaders) |
+| **UI Framework (Desktop)** | Obsidian Dark Glassmorphism (Vanilla CSS, Hardware-accelerated) |
 | **Dependency Injection** | Hilt / Dagger |
-| **Networking** | Java NIO / TCP Sockets, Android NSD (Network Service Discovery) |
+| **Networking** | Java NIO / TCP Sockets, Android NSD (Network Service Discovery), WebSockets |
+| **Hardware Bridge** | Android NFC HCE (Host Card Emulation), APDU protocols |
 | **Document Rendering** | Android `PdfRenderer` + Hardware Bitmap Canvas |
 | **Audio & SFX** | Android `SoundPool` with custom haptic & procedural cues |
 | **Minimum SDK** | Android 8.0 (API Level 26) |
@@ -111,7 +122,7 @@ graph TD
 ## 🧠 Key Challenges & Engineering Solutions
 
 ### 1. Dynamic Island High-Frequency Flicker
-* **The Problem**: During 100+ MB/s transfers, incoming 64KB chunks updated progress several hundred times per second. Because Compose's `AnimatedContent` evaluated the entire transfer data class, every chunk triggered an exit/enter scale transition, causing rapid blinking of the island.
+* **The Problem**: During 100+ MB/s transfers, incoming 64KB chunks updated progress several hundred times per second. Evaluating the entire transfer data class triggered exit/enter scale transitions, causing rapid blinking of the island.
 * **The Solution**: Redesigned the transition keys to depend strictly on state classes (`DynamicIslandState::class`), isolating the high-frequency progress value to in-place linear progress recomposition without container re-inflation.
 
 ### 2. Incomplete PDF Streams & Header Corruption
@@ -122,35 +133,38 @@ graph TD
   3. Added `%PDF-` magic byte validation before invoking `PdfRenderer`.
 
 ### 3. Smooth Screen Navigation & Stale Backstack State
-* **The Problem**: Navigating directly between the Transfers tab and Files tab failed when using standard Compose backstack saving (`saveState = true`), restoring stale peer IDs.
+* **The Problem**: Navigating directly between tabs failed when using standard Compose backstack saving (`saveState = true`), restoring stale peer IDs.
 * **The Solution**: Streamlined tab navigation in `Navigation.kt` with `launchSingleTop = true` and dynamic mesh peer fallback resolution, enabling instant switching across all tabs under any mesh state.
 
-### 4. Air-Gapped Audio & Haptic Synchronization
-* **The Problem**: Sound effects occasionally failed to trigger upon peer discovery and connection events when transitioning from cold-start states.
-* **The Solution**: Implemented a centralized `SoundManager` singleton integrated directly with mesh handshake lifecycle callbacks, ensuring crisp audio confirmation whenever a peer link is established.
+### 4. Background Mesh Lifecycle & Battery Exemption
+* **The Problem**: Aggressive OEM battery managers on Android 11+ killed background P2P mesh sockets when the phone screen turned off.
+* **The Solution**: Integrated a persistent `MeshForegroundService` with notification channels, wake locks, and automated prompts for `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS`.
 
 ---
 
 ## 📁 Project Structure
 
 ```
-homeport-android/
-├── app/
-│   ├── src/main/java/com/homeport/app/
-│   │   ├── data/             # Models, transfer records, peer devices
-│   │   ├── di/               # Hilt dependency injection modules
-│   │   ├── network/          # TCP socket engine, AndroidMeshServer, HomePortClient
-│   │   ├── ui/
-│   │   │   ├── components/   # Smart Dynamic Island, Badges, Radar waves
-│   │   │   ├── screens/
-│   │   │   │   ├── home/         # Primary dashboard & mesh radar
-│   │   │   │   ├── transfers/    # Live transfers & quick open shortcuts
-│   │   │   │   ├── files/        # Remote file explorer
-│   │   │   │   ├── preview/      # PDF & media preview engine
-│   │   │   │   └── onboarding/   # Cinematic launch & 3D intro stages
-│   │   │   ├── theme/        # Volt green palette, typography, glassmorphism
-│   │   │   └── Navigation.kt # NavHost & bottom bubble navigation
-│   └── src/main/res/         # 3D assets, vector drawables, raw audio files
+HOMEPORT/
+├── Portal.apk                # Pre-compiled production release APK
+├── portal_logo.png           # Official brand logo
+├── homeport-android/         # Android Native Jetpack Compose App
+│   ├── app/
+│   │   ├── src/main/java/com/homeport/app/
+│   │   │   ├── domain/model/     # Domain data models & transfer states
+│   │   │   ├── di/               # Hilt dependency injection modules
+│   │   │   ├── network/          # TCP sockets, NFC HCE, MeshForegroundService
+│   │   │   ├── ui/
+│   │   │   │   ├── components/   # Smart Dynamic Island, Glassmorphic cards
+│   │   │   │   ├── screens/      # Home, Devices, Transfers, More, Onboarding
+│   │   │   │   └── theme/        # Deep dark cyber palette & typography
+│   │   │   └── res/              # 60fps video intro, APDU XML, vector drawables
+├── homeport-desktop/         # Electron & TypeScript Desktop Hub
+│   ├── src/
+│   │   ├── main/             # Main process, P2P server, Bonjour mDNS, IPC
+│   │   └── renderer/         # Dashboard, File explorer, Transfers, Settings
+│   └── assets/               # Desktop app icons (.ico, .png)
+└── homeport-signaling/       # Lightweight WebRTC fallback signaling relay
 ```
 
 ---
@@ -159,14 +173,13 @@ homeport-android/
 
 ### Prerequisites
 - Android Studio Ladybug (2024.2+) or later
+- Node.js 18+ & npm
 - JDK 17 or higher
 - Android SDK (API 35 installed)
 
-### Build Debug APK
+### 📱 Android Application
 ```bash
-# Clone the repository
-git clone https://github.com/aditya/deskward.git
-cd deskward/homeport-android
+cd homeport-android
 
 # Assemble debug binary
 ./gradlew assembleDebug
@@ -174,13 +187,25 @@ cd deskward/homeport-android
 # Output APK location:
 # app/build/outputs/apk/debug/app-debug.apk
 ```
+Or directly install the pre-compiled [`Portal.apk`](Portal.apk).
+
+### 💻 Desktop Application
+```bash
+cd homeport-desktop
+
+# Install dependencies
+npm install
+
+# Build TypeScript and start Electron
+npm start
+```
 
 ---
 
 ## 🎨 Design Language & Brand Identity
 
-* **Primary Contrast**: Deep Void Black (`#000000`)
-* **Signature Accent**: Electric Volt Green (`#C1F800`)
-* **Secondary Surface**: Graphite Charcoal (`#121418`)
-* **Action Tones**: Soft Emerald (`#10B981`) for completed tasks, Pure White (`#FFFFFF`) for primary call-to-actions.
+* **Primary Contrast**: Deep Obsidian Black (`#080909`)
+* **Signature Accent**: Electric Mint Green (`#7DD6B0` / `#A5F0D0`)
+* **Secondary Surface**: Graphite Frosted Glass (`rgba(18,21,22,0.85)`)
+* **Action Tones**: Soft Emerald (`#34C759`) for completed tasks, Pure White (`#FFFFFF`) for primary call-to-actions.
 * **Design Philosophy**: Minimalist, hardware-centric, zero-clutter, information-dense.

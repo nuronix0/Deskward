@@ -1,5 +1,5 @@
 # ==========================================
-# Deskward Git Ignore Rules
+# Portal Git Ignore Rules
 # ==========================================
 
 # Android build outputs, caches & IDE files
@@ -14,6 +14,7 @@
 **/.cxx/
 **/generated/
 homeport-android/Deskward.apk
+homeport-android/Portal.apk
 
 # Node.js & Desktop build outputs
 **/node_modules/
@@ -21,10 +22,12 @@ homeport-android/Deskward.apk
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+*.log
 
 # External reference libraries & cloned repos
 AppIntro/
 apple-design/
+awesome-design-md/
 hig/
 icon library/
 JetIsland_Dynamic-Island-Jetpack-Compose/
@@ -39,6 +42,7 @@ scripts/
 skills/
 SmartIsland/
 top-welcome-screens/
+ui/
 ui library/
 uikit/
 uisfx/
@@ -50,10 +54,17 @@ ChatGPT*
 test_*
 android_screen_*
 android_home_screen*
+device_screenshot*
+screen_intro*
+shot*
+frame*
+Untitled*
+launch-portal.bat
 image.png
 /google-services.json
 FINAL*
 *logo.png
+!portal_logo.png
 !deskward_logo.png
 deskward_logo_background_removed.png
 deskward_home*
@@ -62,6 +73,8 @@ deskward_qr_shortcut.png
 preview_onboarding_*.png
 onboarding_preview.html
 style.css
+*.mp4
+!homeport-android/app/src/main/res/raw/portal_intro.mp4
 
 # Operating system metadata
 .DS_Store

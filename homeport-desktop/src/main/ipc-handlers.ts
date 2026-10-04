@@ -453,7 +453,7 @@ export function registerIpcHandlers(mainWindow: BrowserWindow | null): void {
 
   // ---- Get Downloads path ---------------------------------------------
   ipcMain.handle('get-downloads-path', () => {
-    const dir = path.join(os.homedir(), 'Downloads', 'Deskward');
+    const dir = path.join(os.homedir(), 'Downloads', 'Portal');
     if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
     return dir;
   });

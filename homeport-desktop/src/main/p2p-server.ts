@@ -141,7 +141,7 @@ export class P2PServer extends EventEmitter {
             {
               id: identity.id,
               name: identity.name + ' (This Device)',
-              platform: `${process.platform} – DESKWARD`,
+              platform: `${process.platform} – Portal`,
               type: 'laptop',
               status: 'online',
               storageTotal: disk.total,
@@ -239,7 +239,7 @@ export class P2PServer extends EventEmitter {
         }
 
         res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ status: 'DESKWARD P2P Online', port: this.port }));
+        res.end(JSON.stringify({ status: 'Portal P2P Online', port: this.port }));
       });
 
       this.wss = new WebSocketServer({ server: this.httpServer });
@@ -1209,7 +1209,7 @@ export class P2PServer extends EventEmitter {
       throw new Error(`Device is not connected (${peerId})`);
     }
 
-    const dlFolder = path.join(os.homedir(), 'Downloads', 'Deskward');
+    const dlFolder = path.join(os.homedir(), 'Downloads', 'Portal');
     if (!fs.existsSync(dlFolder)) fs.mkdirSync(dlFolder, { recursive: true });
 
     let savePath = customSavePath;
@@ -1354,7 +1354,7 @@ export class P2PServer extends EventEmitter {
     remoteFileSize: number
   ): Promise<{ success: boolean; preview?: any; error?: string }> {
     try {
-      const cacheDir = path.join(os.tmpdir(), 'DeskwardCache');
+      const cacheDir = path.join(os.tmpdir(), 'PortalCache');
       if (!fs.existsSync(cacheDir)) fs.mkdirSync(cacheDir, { recursive: true });
 
       const safeName = path.basename(remoteFileName || 'file');

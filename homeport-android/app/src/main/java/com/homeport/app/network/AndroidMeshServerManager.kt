@@ -93,6 +93,26 @@ class AndroidMeshServerManager private constructor(private val context: Context)
 
     fun getActivePairingSecret(): String? = if (System.currentTimeMillis() < pairingSecretExpiry) activePairingSecret else null
 
+    /**
+     * Inject an externally-generated one-time pairing secret (e.g. from NFC tap flow).
+     * Valid for the same TTL as a generated secret.
+     */
+    fun setActivePairingSecret(secret: String) {
+        activePairingSecret = secret.trim().uppercase()
+        pairingSecretExpiry = System.currentTimeMillis() + TTL_MS
+        Log.i(TAG, "External pairing secret registered (NFC flow)")
+    }
+
+    /**
+     * Returns this device's best local LAN IPv4 address derived from the running server's
+     * network interface, or null if the server isn't running yet.
+     */
+    fun getServerIp(): String? {
+        return if (_isRunning.value) {
+            NetworkUtils.getBestLocalIpv4(context)
+        } else null
+    }
+
     fun onClientConnected(client: ConnectedClient) {
         val current = _incomingClients.value.toMutableList()
         current.removeAll { it.id == client.id }

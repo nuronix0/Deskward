@@ -4,6 +4,18 @@ import { getIdentity } from './identity';
 import { p2pServer } from './p2p-server';
 import { registerIpcHandlers } from './ipc-handlers';
 
+import * as fs from 'fs';
+
+process.on('uncaughtException', (err) => {
+  console.error('[Main] Uncaught Exception:', err);
+  try { fs.appendFileSync(path.join(__dirname, '../../crash.log'), `[${new Date().toISOString()}] Uncaught: ${err?.stack || err}\n`); } catch (_) {}
+});
+
+process.on('unhandledRejection', (reason) => {
+  console.error('[Main] Unhandled Rejection:', reason);
+  try { fs.appendFileSync(path.join(__dirname, '../../crash.log'), `[${new Date().toISOString()}] Rejection: ${reason}\n`); } catch (_) {}
+});
+
 let mainWindow: BrowserWindow | null = null;
 
 async function createWindow() {
@@ -29,7 +41,8 @@ async function createWindow() {
     minHeight: 600,
     backgroundColor: '#111113',
     show: true,
-    title: 'DESKWARD',
+    title: 'Portal',
+    icon: path.join(__dirname, '../../assets/icon.png'),
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
@@ -68,9 +81,6 @@ async function createWindow() {
 
   // Register all IPC handlers (passes mainWindow for push events)
   registerIpcHandlers(mainWindow);
-
-  // Legacy single-use handlers kept for shell.openPath
-  ipcMain.handle('open-file', async (_e, filePath: string) => shell.openPath(filePath));
 }
 
 app.whenReady().then(createWindow);

@@ -34,7 +34,8 @@ data class PairingParams(
     val port: Int,
     val peerId: String,
     val peerName: String,
-    val secret: String
+    val secret: String,
+    val relayId: String? = null  // Firebase WebRTC room key (= peerId when not specified)
 )
 
 data class PeerSession(
@@ -185,7 +186,12 @@ class HomePortClient(
             val peerId = uri.getQueryParameter("id") ?: ""
             val peerName = uri.getQueryParameter("name") ?: "Desktop"
             val secret = uri.getQueryParameter("secret") ?: return null
-            PairingParams(ip, port, peerId, peerName, secret)
+            // Accept both camelCase (NFC tags: relayId) and underscore (Desktop QR: relay_id)
+            // Fall back to peerId then secret so Firebase always has a valid room key
+            val relayId = uri.getQueryParameter("relayId")
+                ?: uri.getQueryParameter("relay_id")
+                ?: peerId.ifBlank { secret }
+            PairingParams(ip, port, peerId, peerName, secret, relayId)
         } catch (_: Exception) {
             null
         }
@@ -1260,7 +1266,8 @@ class HomePortClient(
                         } catch (_: Exception) {}
                     }
                     downloadSession.onProgress?.invoke(1f)
-                    markTransferCompleted(done.transferId)
+                    val savedPath = (downloadSession.finalDestination ?: downloadSession.file).absolutePath
+                    markTransferCompleted(done.transferId, localFilePath = savedPath)
                     downloadSession.deferred.complete(true)
                 }
             }
@@ -1797,7 +1804,7 @@ class HomePortClient(
         }
     }
 
-    private fun markTransferCompleted(id: String) {
+    private fun markTransferCompleted(id: String, localFilePath: String? = null) {
         val current = _activeTransfers.value.toMutableList()
         var idx = current.indexOfFirst { it.id == id }
         if (idx < 0) {
@@ -1814,7 +1821,8 @@ class HomePortClient(
             current[idx] = item.copy(
                 bytesTransferred = item.fileSize,
                 status = TransferStatus.COMPLETED,
-                completedAt = System.currentTimeMillis()
+                completedAt = System.currentTimeMillis(),
+                localFilePath = if (item.direction == TransferDirection.DOWNLOAD) localFilePath else null
             )
             _activeTransfers.value = current
         }

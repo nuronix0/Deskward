@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    HCE AID filter for HomePort NFC pairing.
+    AID D2760000850101 = NFC Forum Type 4 Tag NDEF Application (v2).
+    The reader phone's NFC stack will route its SELECT AID command here,
+    causing HomePortHceService to serve the pairing NDEF message.
+    Category "other" = non-payment use case.
+-->
+<host-apdu-service
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:description="@string/nfc_hce_description"
+    android:requireDeviceUnlock="false">
+
+    <aid-group
+        android:description="@string/nfc_hce_description"
+        android:category="other">
+        <aid-filter android:name="D2760000850101"/>
+    </aid-group>
+
+</host-apdu-service>

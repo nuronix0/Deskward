@@ -28,8 +28,12 @@ import com.homeport.app.domain.model.*
 import com.homeport.app.network.HomePortClient
 import com.homeport.app.network.AndroidMeshServerManager
 import com.homeport.app.network.ConnectedClient
+import com.homeport.app.ui.components.bounceClick
 import com.homeport.app.ui.screens.devices.RevokeDeviceDialog
 import com.homeport.app.ui.theme.*
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.ui.composed
 import java.util.Calendar
 import kotlin.math.roundToInt
 
@@ -1108,49 +1112,64 @@ private fun StatChip(
     highlight: Boolean,
     onClick: (() -> Unit)? = null
 ) {
-    val chipShape = RoundedCornerShape(16.dp)
+    val chipShape = RoundedCornerShape(18.dp)
+    val mod = if (onClick != null) Modifier.bounceClick(scaleDown = 0.96f, onClick = onClick) else Modifier
+
     Box(
         modifier = Modifier
+            .then(mod)
             .clip(chipShape)
             .background(
-                if (highlight)
-                    Brush.verticalGradient(listOf(VoltGlassLight, Color(0xFF0D0D0F)))
-                else
-                    Brush.verticalGradient(listOf(Carbon, Carbon))
+                brush = Brush.verticalGradient(
+                    colors = if (highlight) listOf(
+                        Color(0xFF1A1D12),
+                        Color(0xFF111113)
+                    ) else listOf(
+                        Color(0xFF141416),
+                        Color(0xFF0F0F12)
+                    )
+                )
             )
             .border(
-                0.8.dp,
-                if (highlight) VoltBorder else GlassEdgeSubtle,
-                chipShape
+                width = 0.8.dp,
+                brush = if (highlight) Brush.verticalGradient(
+                    0.0f to VoltGreen.copy(alpha = 0.35f),
+                    0.5f to VoltGreen.copy(alpha = 0.10f),
+                    1.0f to Color.Transparent
+                ) else Brush.verticalGradient(
+                    0.0f to Color.White.copy(alpha = 0.10f),
+                    0.8f to Color.Transparent
+                ),
+                shape = chipShape
             )
-            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
-            .padding(horizontal = 18.dp, vertical = 14.dp)
+            .padding(horizontal = 18.dp, vertical = 16.dp)
     ) {
         Column {
             Text(
                 text = value,
                 style = MaterialTheme.typography.headlineSmall.copy(
                     fontWeight = FontWeight.ExtraBold,
-                    fontSize = 26.sp,
-                    letterSpacing = (-1).sp
+                    fontSize = 28.sp,
+                    letterSpacing = (-1.5).sp
                 ),
                 color = if (highlight) VoltGreen else White90
             )
-            Spacer(Modifier.height(1.dp))
+            Spacer(Modifier.height(2.dp))
             Text(
-                text = label,
+                text = label.uppercase(),
                 style = MaterialTheme.typography.labelSmall.copy(
-                    fontSize = 10.sp,
-                    letterSpacing = 0.5.sp
+                    fontSize = 9.sp,
+                    letterSpacing = 1.1.sp,
+                    fontWeight = FontWeight.Medium
                 ),
-                color = if (highlight) VoltGreenDim else White40
+                color = if (highlight) VoltGreen.copy(alpha = 0.65f) else White40
             )
         }
     }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// SectionLabel — minimal left label + right text action
+// SectionLabel — Linear-style: volt accent line + tight uppercase title
 // ─────────────────────────────────────────────────────────────────────────────
 @Composable
 private fun SectionLabel(
@@ -1164,28 +1183,51 @@ private fun SectionLabel(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.titleLarge.copy(
-                fontWeight = FontWeight.Bold,
-                fontSize = 18.sp,
-                letterSpacing = (-0.3).sp
-            ),
-            color = White90
-        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            // Volt accent micro-line (Linear-style single chromatic accent)
+            Box(
+                modifier = Modifier
+                    .width(3.dp)
+                    .height(18.dp)
+                    .clip(RoundedCornerShape(2.dp))
+                    .background(
+                        brush = Brush.verticalGradient(
+                            listOf(
+                                VoltGreen,
+                                VoltGreen.copy(alpha = 0.35f)
+                            )
+                        )
+                    )
+            )
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleLarge.copy(
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 17.sp,
+                    letterSpacing = (-0.4).sp
+                ),
+                color = White90
+            )
+        }
         if (action != null && onAction != null) {
             Row(
                 modifier = Modifier
                     .clip(RoundedCornerShape(8.dp))
+                    .background(VoltGlassLight)
+                    .border(0.6.dp, VoltBorder, RoundedCornerShape(8.dp))
                     .clickable(onClick = onAction)
-                    .padding(horizontal = 8.dp, vertical = 4.dp),
+                    .padding(horizontal = 10.dp, vertical = 5.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
                     text = action,
                     style = MaterialTheme.typography.labelMedium.copy(
                         fontWeight = FontWeight.SemiBold,
-                        fontSize = 12.sp
+                        fontSize = 11.sp,
+                        letterSpacing = 0.3.sp
                     ),
                     color = VoltGreen
                 )
@@ -1194,7 +1236,7 @@ private fun SectionLabel(
                     imageVector = Icons.Outlined.ChevronRight,
                     contentDescription = null,
                     tint = VoltGreen,
-                    modifier = Modifier.size(14.dp)
+                    modifier = Modifier.size(13.dp)
                 )
             }
         }
@@ -1202,8 +1244,8 @@ private fun SectionLabel(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// VoltDeviceCard — premium dark device card with volt-green active indicator
-// Obtic-style widget: square-ish, bold label, icon, status indicator at top
+// VoltDeviceCard — hardware-grade dark card with ambient glow & spring press
+// Linear-inspired: tight border radius, specular top-rim, accent only on CTAs
 // ─────────────────────────────────────────────────────────────────────────────
 @Composable
 private fun VoltDeviceCard(
@@ -1213,43 +1255,74 @@ private fun VoltDeviceCard(
     val isOnline = device.status == DeviceStatus.ONLINE
     val cardShape = RoundedCornerShape(22.dp)
 
+    // Pulse animation for online status dot
+    val infiniteTransition = rememberInfiniteTransition(label = "card_pulse")
+    val dotPulse by infiniteTransition.animateFloat(
+        initialValue = 1f,
+        targetValue = if (isOnline) 1.6f else 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1000, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "dot_pulse"
+    )
+
     Box(
         modifier = Modifier
-            .width(140.dp)
-            .height(164.dp)
+            .width(144.dp)
+            .height(168.dp)
+            .bounceClick(scaleDown = 0.95f, onClick = onClick)
             .clip(cardShape)
             .background(
-                if (isOnline)
-                    Brush.verticalGradient(
-                        listOf(
-                            Color(0xFF181A14),  // very dark volt-tinted
-                            Color(0xFF121212)
-                        )
+                brush = Brush.verticalGradient(
+                    colors = if (isOnline) listOf(
+                        Color(0xFF17190F),  // deep volt-tinted
+                        Color(0xFF111112)
+                    ) else listOf(
+                        Color(0xFF141416),
+                        Color(0xFF0F0F12)
                     )
-                else
-                    Brush.verticalGradient(listOf(Charcoal, Carbon))
+                )
             )
             .border(
-                0.8.dp,
-                if (isOnline) VoltBorder else GlassEdgeSubtle,
-                cardShape
+                width = 0.8.dp,
+                brush = if (isOnline) Brush.verticalGradient(
+                    0.0f to VoltGreen.copy(alpha = 0.30f),
+                    0.4f to VoltGreen.copy(alpha = 0.08f),
+                    1.0f to Color.Transparent
+                ) else Brush.verticalGradient(
+                    0.0f to Color.White.copy(alpha = 0.10f),
+                    0.5f to Color.Transparent
+                ),
+                shape = cardShape
             )
-            .clickable(onClick = onClick)
     ) {
-        // Volt glow at top-right if online
-        if (isOnline) {
-            Canvas(modifier = Modifier.fillMaxSize()) {
+        // Ambient corner glow
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            if (isOnline) {
+                // Primary volt glow — upper-right
                 drawCircle(
                     brush = Brush.radialGradient(
                         colors = listOf(
-                            Color(0xFFC8FF00).copy(alpha = 0.12f),
+                            Color(0xFFC1F800).copy(alpha = 0.14f),
                             Color.Transparent
                         ),
-                        center = Offset(size.width * 0.85f, 0f),
-                        radius = size.width * 0.75f
+                        center = Offset(size.width * 0.88f, 0f),
+                        radius = size.width * 0.70f
                     ),
-                    radius = size.width * 0.75f,
-                    center = Offset(size.width * 0.85f, 0f)
+                    radius = size.width * 0.70f,
+                    center = Offset(size.width * 0.88f, 0f)
+                )
+            } else {
+                // Subtle specular top-edge for offline cards
+                drawRect(
+                    brush = Brush.verticalGradient(
+                        colors = listOf(
+                            Color.White.copy(alpha = 0.04f),
+                            Color.Transparent
+                        ),
+                        endY = size.height * 0.3f
+                    )
                 )
             }
         }
@@ -1260,34 +1333,50 @@ private fun VoltDeviceCard(
                 .padding(16.dp),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            // Top row: status dot + device type icon
+            // Top row: animated status dot + device type icon
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Status indicator
+                // Pulsing status dot with outer ring
                 Box(
-                    modifier = Modifier
-                        .size(8.dp)
-                        .clip(CircleShape)
-                        .background(
-                            if (isOnline) VoltGreen else Steel
+                    modifier = Modifier.size(16.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    if (isOnline) {
+                        Box(
+                            modifier = Modifier
+                                .size(14.dp * dotPulse.coerceAtMost(1.6f))
+                                .clip(CircleShape)
+                                .background(VoltGreen.copy(alpha = 0.25f / dotPulse.coerceAtLeast(1f)))
                         )
-                )
+                    }
+                    Box(
+                        modifier = Modifier
+                            .size(7.dp)
+                            .clip(CircleShape)
+                            .background(if (isOnline) VoltGreen else Steel)
+                    )
+                }
 
-                // Device icon in a small dark pill
+                // Device icon — specular frosted pill
                 Box(
                     modifier = Modifier
-                        .size(34.dp)
-                        .clip(RoundedCornerShape(10.dp))
+                        .size(36.dp)
+                        .clip(RoundedCornerShape(11.dp))
                         .background(
-                            if (isOnline) VoltGlassLight else Glass04
+                            brush = Brush.verticalGradient(
+                                listOf(
+                                    if (isOnline) VoltGlassLight.copy(alpha = 1.4f) else Color(0xFF1C1C1E),
+                                    if (isOnline) VoltGlassLight else Color(0xFF161618)
+                                )
+                            )
                         )
                         .border(
                             0.6.dp,
                             if (isOnline) VoltBorder else GlassEdgeSubtle,
-                            RoundedCornerShape(10.dp)
+                            RoundedCornerShape(11.dp)
                         ),
                     contentAlignment = Alignment.Center
                 ) {
@@ -1305,25 +1394,37 @@ private fun VoltDeviceCard(
                 }
             }
 
-            // Bottom: device name + status text
+            // Bottom: device name + monospace platform label
             Column {
+                // Monospace platform eyebrow (inspired by Warp/VoltAgent)
+                Text(
+                    text = device.platform.take(14).uppercase(),
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        fontSize = 9.sp,
+                        letterSpacing = 1.2.sp,
+                        fontWeight = FontWeight.Medium
+                    ),
+                    color = if (isOnline) VoltGreen.copy(alpha = 0.7f) else White20
+                )
+                Spacer(Modifier.height(3.dp))
                 Text(
                     text = device.name,
                     style = MaterialTheme.typography.titleSmall.copy(
-                        fontWeight = FontWeight.SemiBold,
-                        fontSize = 13.sp
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 13.sp,
+                        letterSpacing = (-0.2).sp
                     ),
                     color = if (isOnline) White100 else White60,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                     lineHeight = 16.sp
                 )
-                Spacer(Modifier.height(3.dp))
+                Spacer(Modifier.height(2.dp))
                 Text(
-                    text = if (isOnline) "Connected" else "Offline",
+                    text = if (isOnline) "● Connected" else "○ Offline",
                     style = MaterialTheme.typography.labelSmall.copy(
                         fontSize = 10.sp,
-                        letterSpacing = 0.3.sp
+                        letterSpacing = 0.4.sp
                     ),
                     color = if (isOnline) VoltGreenDim else White20
                 )
@@ -1333,7 +1434,8 @@ private fun VoltDeviceCard(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// FileRow — ultra clean file list item
+// FileRow — premium file list item with left accent stripe + gradient surface
+// Inspired by Linear's list items: color-coded left accent, monospace metadata
 // ─────────────────────────────────────────────────────────────────────────────
 @Composable
 fun FileRow(
@@ -1342,64 +1444,130 @@ fun FileRow(
     modifier: Modifier = Modifier
 ) {
     val rowShape = RoundedCornerShape(16.dp)
+    val accentColor = fileTypeColor(file.extension)
+
     Row(
         modifier = modifier
             .fillMaxWidth()
             .clip(rowShape)
-            .background(Carbon)
-            .border(0.6.dp, GlassEdgeSubtle, rowShape)
+            .background(
+                brush = Brush.horizontalGradient(
+                    colors = listOf(
+                        accentColor.copy(alpha = 0.06f),
+                        Color(0xFF111113)
+                    )
+                )
+            )
+            .border(
+                width = 0.6.dp,
+                brush = Brush.horizontalGradient(
+                    listOf(
+                        accentColor.copy(alpha = 0.25f),
+                        GlassEdgeSubtle
+                    )
+                ),
+                shape = rowShape
+            )
             .clickable(onClick = onClick)
-            .padding(horizontal = 14.dp, vertical = 12.dp),
+            .padding(start = 0.dp, end = 14.dp, top = 0.dp, bottom = 0.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        // Left color-coded vertical accent bar (Linear list pattern)
+        Box(
+            modifier = Modifier
+                .width(3.dp)
+                .height(48.dp)
+                .background(
+                    brush = Brush.verticalGradient(
+                        listOf(
+                            accentColor.copy(alpha = 0.8f),
+                            accentColor.copy(alpha = 0.2f)
+                        )
+                    )
+                )
+        )
+
+        Spacer(Modifier.width(12.dp))
+
         // File type icon pill
         Box(
             modifier = Modifier
-                .size(40.dp)
-                .clip(RoundedCornerShape(12.dp))
-                .background(fileTypeColor(file.extension).copy(alpha = 0.15f)),
+                .size(38.dp)
+                .clip(RoundedCornerShape(11.dp))
+                .background(
+                    brush = Brush.verticalGradient(
+                        listOf(
+                            accentColor.copy(alpha = 0.18f),
+                            accentColor.copy(alpha = 0.08f)
+                        )
+                    )
+                ),
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 imageVector = fileTypeIcon(file.extension),
                 contentDescription = null,
-                tint = fileTypeColor(file.extension),
-                modifier = Modifier.size(20.dp)
+                tint = accentColor,
+                modifier = Modifier.size(19.dp)
             )
         }
 
         Spacer(Modifier.width(12.dp))
 
-        Column(modifier = Modifier.weight(1f)) {
+        Column(modifier = Modifier.weight(1f).padding(vertical = 12.dp)) {
             Text(
                 text = file.name,
                 style = MaterialTheme.typography.titleSmall.copy(
                     fontWeight = FontWeight.SemiBold,
-                    fontSize = 13.sp
+                    fontSize = 13.sp,
+                    letterSpacing = (-0.1).sp
                 ),
                 color = White90,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
-            Spacer(Modifier.height(2.dp))
-            Text(
-                text = "${formatSize(file.size)} · ${file.extension.uppercase()}",
-                style = MaterialTheme.typography.labelSmall.copy(fontSize = 11.sp),
-                color = White40
-            )
+            Spacer(Modifier.height(3.dp))
+            // Monospace meta row (Warp-style)
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = file.extension.uppercase(),
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        fontSize = 9.sp,
+                        letterSpacing = 1.0.sp,
+                        fontWeight = FontWeight.SemiBold
+                    ),
+                    color = accentColor.copy(alpha = 0.8f)
+                )
+                Text(
+                    text = "·",
+                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
+                    color = White20
+                )
+                Text(
+                    text = formatSize(file.size),
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        fontSize = 11.sp,
+                        letterSpacing = 0.sp
+                    ),
+                    color = White40
+                )
+            }
         }
 
         Icon(
             imageVector = Icons.Outlined.ChevronRight,
             contentDescription = null,
             tint = White20,
-            modifier = Modifier.size(16.dp)
+            modifier = Modifier.size(15.dp)
         )
     }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// ActiveTransferRow
+// ActiveTransferRow — gradient progress bar with volt glow + animated pulse
 // ─────────────────────────────────────────────────────────────────────────────
 @Composable
 private fun ActiveTransferRow(
@@ -1407,108 +1575,243 @@ private fun ActiveTransferRow(
     modifier: Modifier = Modifier
 ) {
     val progress = transfer.progress
-    val rowShape = RoundedCornerShape(16.dp)
+    val rowShape = RoundedCornerShape(18.dp)
+
+    // Shimmer sweep animation on progress bar
+    val infiniteTransition = rememberInfiniteTransition(label = "transfer_shimmer")
+    val shimmerX by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 400f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1400, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "shimmer_x"
+    )
 
     Column(
         modifier = modifier
             .clip(rowShape)
-            .background(Carbon)
-            .border(0.6.dp, GlassEdgeSubtle, rowShape)
-            .padding(horizontal = 14.dp, vertical = 12.dp)
+            .background(
+                brush = Brush.verticalGradient(
+                    colors = listOf(
+                        Color(0xFF181A14),
+                        Color(0xFF111112)
+                    )
+                )
+            )
+            .border(
+                width = 0.8.dp,
+                brush = Brush.verticalGradient(
+                    0.0f to VoltGreen.copy(alpha = 0.20f),
+                    0.5f to VoltGreen.copy(alpha = 0.06f),
+                    1.0f to Color.Transparent
+                ),
+                shape = rowShape
+            )
+            .padding(horizontal = 16.dp, vertical = 14.dp)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = transfer.fileName,
-                style = MaterialTheme.typography.titleSmall.copy(
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 13.sp
-                ),
-                color = White90,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.weight(1f)
-            )
+            // File name with transfer direction indicator
+            Row(
+                modifier = Modifier.weight(1f),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.SwapHoriz,
+                    contentDescription = null,
+                    tint = VoltGreen.copy(alpha = 0.8f),
+                    modifier = Modifier.size(15.dp)
+                )
+                Text(
+                    text = transfer.fileName,
+                    style = MaterialTheme.typography.titleSmall.copy(
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 13.sp,
+                        letterSpacing = (-0.1).sp
+                    ),
+                    color = White90,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
             Spacer(Modifier.width(12.dp))
+            // Bold percentage in volt
             Text(
                 text = "${(progress * 100).roundToInt()}%",
                 style = MaterialTheme.typography.labelSmall.copy(
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 12.sp
+                    fontWeight = FontWeight.ExtraBold,
+                    fontSize = 13.sp,
+                    letterSpacing = (-0.2).sp
                 ),
                 color = VoltGreen
             )
         }
-        Spacer(Modifier.height(8.dp))
-        // Progress bar
+        Spacer(Modifier.height(10.dp))
+        // Animated gradient progress bar
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(3.dp)
+                .height(4.dp)
                 .clip(RoundedCornerShape(2.dp))
-                .background(Zinc)
+                .background(Color(0xFF252528))
         ) {
+            // Filled portion with gradient
             Box(
                 modifier = Modifier
-                    .fillMaxWidth(progress)
-                    .height(3.dp)
+                    .fillMaxWidth(progress.coerceIn(0f, 1f))
+                    .height(4.dp)
                     .clip(RoundedCornerShape(2.dp))
-                    .background(VoltGreen)
+                    .background(
+                        brush = Brush.horizontalGradient(
+                            listOf(
+                                VoltGreen.copy(alpha = 0.8f),
+                                VoltGreen
+                            )
+                        )
+                    )
+            )
+            // Shimmer sweep over filled portion
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(progress.coerceIn(0f, 1f))
+                    .height(4.dp)
+                    .clip(RoundedCornerShape(2.dp))
+                    .background(
+                        brush = Brush.linearGradient(
+                            colors = listOf(
+                                Color.Transparent,
+                                Color.White.copy(alpha = 0.35f),
+                                Color.Transparent
+                            ),
+                            start = Offset(shimmerX - 80f, 0f),
+                            end = Offset(shimmerX, 0f)
+                        )
+                    )
             )
         }
     }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Empty state cards
+// Empty state cards — premium dark surfaces with atmospheric volt accent
 // ─────────────────────────────────────────────────────────────────────────────
 @Composable
 private fun EmptyDevicesCard(onPairClick: () -> Unit, modifier: Modifier = Modifier) {
-    val shape = RoundedCornerShape(20.dp)
+    val shape = RoundedCornerShape(24.dp)
     Box(
         modifier = modifier
             .fillMaxWidth()
+            .bounceClick(scaleDown = 0.97f, onClick = onPairClick)
             .clip(shape)
-            .background(Carbon)
-            .border(0.8.dp, GlassEdgeSubtle, shape)
-            .clickable(onClick = onPairClick)
-            .padding(24.dp),
+            .background(
+                brush = Brush.verticalGradient(
+                    colors = listOf(
+                        Color(0xFF171919),
+                        Color(0xFF0F0F12)
+                    )
+                )
+            )
+            .border(
+                width = 0.8.dp,
+                brush = Brush.verticalGradient(
+                    0.0f to Color.White.copy(alpha = 0.12f),
+                    0.4f to Color.White.copy(alpha = 0.04f),
+                    1.0f to Color.Transparent
+                ),
+                shape = shape
+            )
+            .padding(28.dp),
         contentAlignment = Alignment.Center
     ) {
+        // Atmospheric volt glow behind icon
+        Canvas(modifier = Modifier.matchParentSize()) {
+            drawCircle(
+                brush = Brush.radialGradient(
+                    colors = listOf(
+                        VoltGreen.copy(alpha = 0.06f),
+                        Color.Transparent
+                    ),
+                    center = Offset(size.width / 2f, size.height * 0.35f),
+                    radius = size.width * 0.55f
+                ),
+                radius = size.width * 0.55f,
+                center = Offset(size.width / 2f, size.height * 0.35f)
+            )
+        }
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Box(
                 modifier = Modifier
-                    .size(52.dp)
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(VoltGlassLight)
-                    .border(0.8.dp, VoltBorder, RoundedCornerShape(16.dp)),
+                    .size(56.dp)
+                    .clip(RoundedCornerShape(18.dp))
+                    .background(
+                        brush = Brush.verticalGradient(
+                            listOf(VoltGlassLight, VoltGlassLight.copy(alpha = 0.6f))
+                        )
+                    )
+                    .border(
+                        width = 0.8.dp,
+                        brush = Brush.verticalGradient(
+                            0.0f to VoltGreen.copy(alpha = 0.40f),
+                            1.0f to VoltGreen.copy(alpha = 0.10f)
+                        ),
+                        shape = RoundedCornerShape(18.dp)
+                    ),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = Icons.Outlined.AddCircle,
                     contentDescription = null,
                     tint = VoltGreen,
-                    modifier = Modifier.size(24.dp)
+                    modifier = Modifier.size(26.dp)
                 )
             }
-            Spacer(Modifier.height(14.dp))
+            Spacer(Modifier.height(16.dp))
             Text(
                 text = "No devices paired",
                 style = MaterialTheme.typography.titleMedium.copy(
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 15.sp
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 15.sp,
+                    letterSpacing = (-0.2).sp
                 ),
                 color = White90
             )
-            Spacer(Modifier.height(4.dp))
+            Spacer(Modifier.height(6.dp))
             Text(
                 text = "Tap to scan QR and pair your first device",
-                style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
+                style = MaterialTheme.typography.bodySmall.copy(
+                    fontSize = 12.sp,
+                    letterSpacing = 0.1.sp
+                ),
                 color = White40
             )
+            Spacer(Modifier.height(18.dp))
+            // CTA pill
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(99.dp))
+                    .background(
+                        brush = Brush.horizontalGradient(
+                            listOf(VoltGreen, Color(0xFFE8FF60))
+                        )
+                    )
+                    .padding(horizontal = 22.dp, vertical = 10.dp)
+            ) {
+                Text(
+                    text = "Scan QR Code",
+                    style = MaterialTheme.typography.labelMedium.copy(
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 12.sp,
+                        letterSpacing = 0.2.sp
+                    ),
+                    color = Color(0xFF0A0A0C)
+                )
+            }
         }
     }
 }
@@ -1520,24 +1823,55 @@ private fun EmptyFilesCard(modifier: Modifier = Modifier) {
         modifier = modifier
             .fillMaxWidth()
             .clip(shape)
-            .background(Carbon)
-            .border(0.8.dp, GlassEdgeSubtle, shape)
+            .background(
+                brush = Brush.verticalGradient(
+                    listOf(Color(0xFF141416), Color(0xFF0F0F12))
+                )
+            )
+            .border(
+                width = 0.8.dp,
+                brush = Brush.verticalGradient(
+                    0.0f to Color.White.copy(alpha = 0.08f),
+                    1.0f to Color.Transparent
+                ),
+                shape = shape
+            )
             .padding(24.dp),
         contentAlignment = Alignment.Center
     ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Icon(
-                imageVector = Icons.Outlined.Folder,
-                contentDescription = null,
-                tint = White20,
-                modifier = Modifier.size(32.dp)
-            )
-            Spacer(Modifier.height(10.dp))
-            Text(
-                text = "No recent files",
-                style = MaterialTheme.typography.bodyMedium.copy(fontSize = 14.sp),
-                color = White40
-            )
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(Glass04),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.Folder,
+                    contentDescription = null,
+                    tint = White40,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+            Column {
+                Text(
+                    text = "No recent files",
+                    style = MaterialTheme.typography.titleSmall.copy(
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 13.sp
+                    ),
+                    color = White60
+                )
+                Text(
+                    text = "Files you access will appear here",
+                    style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp),
+                    color = White20
+                )
+            }
         }
     }
 }

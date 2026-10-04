@@ -19,5 +19,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "HomePort"
+rootProject.name = "Portal"
 include(":app")

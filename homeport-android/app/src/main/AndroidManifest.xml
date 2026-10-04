@@ -43,6 +43,7 @@
             android:name=".ui.MainActivity"
             android:exported="true"
             android:launchMode="singleTop"
+            android:label="@string/app_name"
             android:theme="@style/Theme.HomePort.Splash"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
@@ -70,6 +71,26 @@
             android:name=".network.MeshForegroundService"
             android:exported="false"
             android:foregroundServiceType="connectedDevice|dataSync" />
+
+        <!--
+            NFC Host Card Emulation service (Android 4.4+ / API 19+).
+            Lets this phone act as an NFC card so another phone can TAP it
+            and instantly read the HomePort pairing URL — no Android Beam needed.
+            The AID D2760000850101 matches the NFC Forum Type 4 Tag application.
+        -->
+        <service
+            android:name=".network.HomePortHceService"
+            android:exported="true"
+            android:permission="android.permission.BIND_NFC_SERVICE">
+            <intent-filter>
+                <action android:name="android.nfc.cardemulation.action.HOST_APDU_SERVICE" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <meta-data
+                android:name="android.nfc.cardemulation.host_apdu_service"
+                android:resource="@xml/apduservice" />
+        </service>
+
 
         <provider
             android:name="androidx.core.content.FileProvider"

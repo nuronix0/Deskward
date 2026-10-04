@@ -1,3 +1,5 @@
 <resources>
-    <string name="app_name">DESKWARD</string>
+    <string name="app_name">Portal</string>
+    <string name="nfc_hce_description">Portal NFC Pairing</string>
 </resources>
+

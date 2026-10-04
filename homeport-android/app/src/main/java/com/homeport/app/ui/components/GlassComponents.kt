@@ -31,37 +31,54 @@ import androidx.compose.ui.res.painterResource
 import com.homeport.app.R
 
 // ─────────────────────────────────────────────────────────────────────────────
-// AtmosphericBackground — Volumetric ambient lighting (mint-teal accent per HOMEPORT logo)
+// AtmosphericBackground — 5-layer volumetric ambient lighting
+// Inspired by ElevenLabs orb system + VoltAgent electric-green brand accent
 // ─────────────────────────────────────────────────────────────────────────────
 @Composable
 fun AtmosphericBackground(modifier: Modifier = Modifier) {
     Canvas(modifier = modifier) {
-        // 0. Base — near-black Obsidian (Livora / Obtic dark)
+        // 0. Base — near-black Obsidian void
         drawRect(
             brush = Brush.verticalGradient(
                 colors = listOf(
-                    Color(0xFF0A0A0C),
+                    Color(0xFF080809),
                     Color(0xFF0D0D0F),
                     Color(0xFF0F0F12)
                 )
             )
         )
 
-        // 1. Volt-green soft radial glow — upper-right accent
+        // 1. Volt-green primary radial — upper-right hero accent (8%)
         drawCircle(
             brush = Brush.radialGradient(
                 colors = listOf(
-                    Color(0xFFC8FF00).copy(alpha = 0.06f),
+                    Color(0xFFC1F800).copy(alpha = 0.08f),
+                    Color(0xFFC1F800).copy(alpha = 0.03f),
                     Color.Transparent
                 ),
-                center = Offset(size.width * 0.88f, size.height * 0.08f),
-                radius = size.width * 0.80f
+                center = Offset(size.width * 0.90f, size.height * 0.06f),
+                radius = size.width * 0.85f
             ),
-            radius = size.width * 0.80f,
-            center = Offset(size.width * 0.88f, size.height * 0.08f)
+            radius = size.width * 0.85f,
+            center = Offset(size.width * 0.90f, size.height * 0.06f)
         )
 
-        // 2. Carbon depth lift — subtle warm centre
+        // 2. Deep azure accent — lower-left atmospheric wash (3%)
+        // Creates depth contrast against the volt upper-right
+        drawCircle(
+            brush = Brush.radialGradient(
+                colors = listOf(
+                    Color(0xFF1A6EFF).copy(alpha = 0.03f),
+                    Color.Transparent
+                ),
+                center = Offset(size.width * 0.08f, size.height * 0.82f),
+                radius = size.width * 0.65f
+            ),
+            radius = size.width * 0.65f,
+            center = Offset(size.width * 0.08f, size.height * 0.82f)
+        )
+
+        // 3. Warm centre depth lift — carbon surface feel (50%)
         drawCircle(
             brush = Brush.radialGradient(
                 colors = listOf(
@@ -75,26 +92,40 @@ fun AtmosphericBackground(modifier: Modifier = Modifier) {
             center = Offset(size.width * 0.40f, size.height * 0.30f)
         )
 
-        // 3. Volt micro-glow — bottom-left corner hint
+        // 4. Volt micro-glow — bottom-left corner hint (2.5%)
         drawCircle(
             brush = Brush.radialGradient(
                 colors = listOf(
-                    Color(0xFFC8FF00).copy(alpha = 0.025f),
+                    Color(0xFFC1F800).copy(alpha = 0.025f),
                     Color.Transparent
                 ),
-                center = Offset(size.width * 0.05f, size.height * 0.88f),
-                radius = size.width * 0.50f
+                center = Offset(size.width * 0.05f, size.height * 0.90f),
+                radius = size.width * 0.45f
             ),
-            radius = size.width * 0.50f,
-            center = Offset(size.width * 0.05f, size.height * 0.88f)
+            radius = size.width * 0.45f,
+            center = Offset(size.width * 0.05f, size.height * 0.90f)
+        )
+
+        // 5. Mid-screen subtle warm ember — adds organic breathing quality (1.5%)
+        drawCircle(
+            brush = Brush.radialGradient(
+                colors = listOf(
+                    Color(0xFFFF8A00).copy(alpha = 0.015f),
+                    Color.Transparent
+                ),
+                center = Offset(size.width * 0.55f, size.height * 0.55f),
+                radius = size.width * 0.60f
+            ),
+            radius = size.width * 0.60f,
+            center = Offset(size.width * 0.55f, size.height * 0.55f)
         )
     }
 }
 
 
-
 // ─────────────────────────────────────────────────────────────────────────────
-// GlassCard — foundational luxury glassmorphism surface with top-rim light reflection
+// GlassCard — Premium dark surface: specular top-rim + layered depth gradient
+// Inspired by Linear's charcoal panel system (#0f1011 fill, hairline borders)
 // ─────────────────────────────────────────────────────────────────────────────
 @Composable
 fun GlassCard(
@@ -108,10 +139,23 @@ fun GlassCard(
     val shape = RoundedCornerShape(cornerRadius)
     val baseMod = modifier
         .clip(shape)
-        .background(Carbon)
+        .background(
+            brush = Brush.verticalGradient(
+                colors = listOf(
+                    Color(0xFF141416),  // specular top — slightly lighter
+                    Color(0xFF0F0F12),  // deep base
+                    Color(0xFF0D0D0F)   // bottom shadow pull
+                )
+            )
+        )
         .border(
             width = 0.8.dp,
-            color = GlassEdgeSubtle,
+            brush = Brush.verticalGradient(
+                0.0f to Color.White.copy(alpha = 0.14f),  // top specular rim
+                0.15f to Color.White.copy(alpha = 0.06f),
+                0.85f to Color.Transparent,
+                1.0f to Color.White.copy(alpha = 0.03f)   // subtle base edge
+            ),
             shape = shape
         )
 
@@ -122,6 +166,7 @@ fun GlassCard(
     }
 }
 
+
 fun Modifier.bounceClick(
     enabled: Boolean = true,
     scaleDown: Float = 0.94f,
@@ -131,7 +176,7 @@ fun Modifier.bounceClick(
     val isPressed by interactionSource.collectIsPressedAsState()
     val scale by animateFloatAsState(
         targetValue = if (isPressed && enabled) scaleDown else 1f,
-        animationSpec = spring(dampingRatio = 0.65f, stiffness = 800f),
+        animationSpec = spring(dampingRatio = 0.60f, stiffness = 700f),
         label = "bounce"
     )
 
@@ -147,6 +192,65 @@ fun Modifier.bounceClick(
             onClick = onClick
         )
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ShimmerBox — skeleton loading placeholder with sweeping highlight animation
+// Use for: device cards, file rows, stat cells while data is loading
+// ─────────────────────────────────────────────────────────────────────────────
+@Composable
+fun ShimmerBox(
+    modifier: Modifier = Modifier,
+    cornerRadius: Dp = 12.dp
+) {
+    val transition = rememberInfiniteTransition(label = "shimmer")
+    val translateAnim by transition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1000f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 1200, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "shimmer_translate"
+    )
+
+    val shimmerColors = listOf(
+        Color(0xFF1A1A1E),
+        Color(0xFF242428),
+        Color(0xFF1A1A1E)
+    )
+
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(cornerRadius))
+            .background(
+                brush = Brush.linearGradient(
+                    colors = shimmerColors,
+                    start = Offset(translateAnim - 300f, 0f),
+                    end = Offset(translateAnim, 0f)
+                )
+            )
+    )
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// VoltAccentLine — the 2dp horizontal volt-green accent used as section dividers
+// Inspired by Linear's single-chromatic-accent-only rule
+// ─────────────────────────────────────────────────────────────────────────────
+@Composable
+fun VoltAccentLine(modifier: Modifier = Modifier, width: Dp = 24.dp) {
+    Box(
+        modifier = modifier
+            .width(width)
+            .height(2.dp)
+            .clip(RoundedCornerShape(1.dp))
+            .background(
+                brush = Brush.horizontalGradient(
+                    listOf(VoltGreen, VoltGreen.copy(alpha = 0.4f))
+                )
+            )
+    )
+}
+
 
 // ─────────────────────────────────────────────────────────────────────────────
 // GlassButton — primary action button with specular top rim & ambient glow

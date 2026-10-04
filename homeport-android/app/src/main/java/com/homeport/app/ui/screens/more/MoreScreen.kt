@@ -260,7 +260,7 @@ fun MoreScreen(
                         MoreItem("Settings",      Icons.Outlined.Settings,     { onSettings() }),
                         @Suppress("DEPRECATION")
                         MoreItem("Help & Support", Icons.Outlined.HelpOutline,  { }),
-                        MoreItem("About Deskward", Icons.Outlined.Info,         { }),
+                        MoreItem("About Portal", Icons.Outlined.Info,         { }),
                     ).forEachIndexed { idx, item ->
                         if (idx > 0) HorizontalDivider(
                             modifier = Modifier.padding(start = 56.dp),
@@ -305,7 +305,7 @@ fun MoreScreen(
                     Spacer(Modifier.width(14.dp))
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            "Deskward Pro",
+                            "Portal Pro",
                             style = MaterialTheme.typography.titleMedium,
                             color = White100,
                             fontWeight = FontWeight.Bold

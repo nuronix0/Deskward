@@ -665,7 +665,7 @@ function renderCurrentEntries(query = '') {
 
 // ── DIRECT FILE ACTIONS ───────────────────────────────────────────
 async function directDownloadFile(fileId, deviceId, fileName, fileSize) {
-  showToast(`Downloading ${fileName} to Downloads/Deskward…`, 'info');
+  showToast(`Downloading ${fileName} to Downloads/Portal…`, 'info');
   try {
     const res = await HP.downloadRemoteFile({
       peerId: deviceId,
@@ -832,7 +832,7 @@ async function modalDownloadFile() {
     btn.disabled = true;
     btn.innerHTML = `${I.download} Downloading…`;
   }
-  showToast(`Downloading ${item.name} to Downloads/Deskward…`, 'info');
+  showToast(`Downloading ${item.name} to Downloads/Portal…`, 'info');
 
   try {
     const res = await HP.downloadRemoteFile({
@@ -951,7 +951,7 @@ function renderDashboard() {
 
   // Dash Folders: default top-level folders
   const dashFolders = [
-    { name: 'Downloads', sub: 'Deskward', col: '#3B82F6', badgeCol: '#6366F1' },
+    { name: 'Downloads', sub: 'Portal', col: '#3B82F6', badgeCol: '#6366F1' },
     { name: 'Documents', sub: 'Sync Store', col: '#10B981', badgeCol: '#F59E0B' },
     { name: 'Camera DCIM', sub: 'Phone Media', col: '#EC4899', badgeCol: '#8B5CF6' },
     { name: 'Shared PC', sub: 'Local Folders', col: '#14B8A6', badgeCol: '#06B6D4' }
@@ -1138,7 +1138,7 @@ async function renderSettings() {
   const id = _identity;
   const ss = [
     { t: 'Identity', items: [
-      { i: 'globe', l: 'Device Name', v: id?.name || 'DESKWARD Desktop', tog: false },
+      { i: 'globe', l: 'Device Name', v: id?.name || 'Portal Desktop', tog: false },
       { i: 'lock', l: 'Device ID', v: id?.id || '—', tog: false },
       { i: 'info', l: 'Platform', v: id?.platform || 'Windows Direct P2P', tog: false },
     ]},
@@ -1212,7 +1212,7 @@ async function renderDiagnostics() {
     <div style="margin-top:20px">
       <div class="sec-lbl" style="margin-bottom:12px">Network Info</div>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
-        ${[['Local IP Address', localIps[0]], ['P2P Port', '51234'], ['Protocol', 'WebSocket / Direct LAN'], ['Connected Peers', String(connPeers)], ['Downloads Folder', 'Downloads/Deskward'], ['Status', 'Production Ready']].map(([l, v]) => `
+        ${[['Local IP Address', localIps[0]], ['P2P Port', '51234'], ['Protocol', 'WebSocket / Direct LAN'], ['Connected Peers', String(connPeers)], ['Downloads Folder', 'Downloads/Portal'], ['Status', 'Production Ready']].map(([l, v]) => `
           <div class="sc" style="padding:14px 16px"><div class="sc-lbl">${l}</div><div style="font-size:16px;font-weight:700;color:var(--t1);margin-top:6px">${v}</div></div>
         `).join('')}
       </div>

@@ -93,7 +93,9 @@ data class TransferItem(
     val destinationDeviceId: String,
     val startedAt: Long = 0L,
     val completedAt: Long? = null,
-    val error: String? = null
+    val error: String? = null,
+    /** Absolute path where the received file was saved (null for uploads) */
+    val localFilePath: String? = null
 ) {
     val progress: Float get() = if (fileSize > 0) bytesTransferred.toFloat() / fileSize else 0f
     val formattedProgress: String get() = "${(progress * 100).toInt()}%"

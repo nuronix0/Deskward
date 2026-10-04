@@ -82,7 +82,8 @@ sealed interface DynamicIslandState {
     /** Snappy success badge on completed transfers */
     data class Success(
         val message: String = "Transfer Complete",
-        val detail: String = "File Saved"
+        val detail: String = "File Saved",
+        val filePath: String? = null  // Absolute path of received file (null for uploads)
     ) : DynamicIslandState
 }
 
@@ -243,8 +244,13 @@ object DynamicIslandController {
     /**
      * When a transfer completes, island pops up in full size for 2.0s then auto-collapses to compact pill.
      */
-    fun showSuccess(message: String = "Transfer Complete", detail: String = "", autoCollapseMs: Long = 2000L) {
-        _state.value = DynamicIslandState.Success(message, detail)
+    fun showSuccess(
+        message: String = "Transfer Complete",
+        detail: String = "",
+        filePath: String? = null,
+        autoCollapseMs: Long = 2000L
+    ) {
+        _state.value = DynamicIslandState.Success(message, detail, filePath)
         _isExpanded.value = true
         scheduleAutoCollapse(autoCollapseMs)
     }
@@ -582,38 +588,49 @@ private fun IdleNotchContent() {
     Spacer(Modifier.size(0.dp))
 }
 
-/** Compact Connected Pill */
+/** Compact Connected Pill — hardware-grade with platform eyebrow */
 @Composable
 private fun CompactConnectedContent(state: DynamicIslandState.Connected) {
     Row(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 12.dp),
+            .padding(horizontal = 10.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
         // Left: Pulsing green live beacon
-        PulsingBeaconDot(size = 6.dp, pulseColor = SignalGreen)
+        PulsingBeaconDot(size = 5.dp, pulseColor = SignalGreen)
 
         // Mid-Center: Device icon + Device name
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .weight(1f, fill = false)
-                .padding(horizontal = 6.dp)
+                .padding(horizontal = 7.dp)
         ) {
-            Icon(
-                imageVector = if (state.isDesktop) Icons.Outlined.Laptop else Icons.Outlined.Smartphone,
-                contentDescription = null,
-                tint = VoltGreen,
-                modifier = Modifier.size(14.dp)
-            )
+            // Frosted device icon micro-pill
+            Box(
+                modifier = Modifier
+                    .size(20.dp)
+                    .clip(RoundedCornerShape(6.dp))
+                    .background(VoltGlassLight)
+                    .border(0.5.dp, VoltBorder, RoundedCornerShape(6.dp)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = if (state.isDesktop) Icons.Outlined.Laptop else Icons.Outlined.Smartphone,
+                    contentDescription = null,
+                    tint = VoltGreen,
+                    modifier = Modifier.size(12.dp)
+                )
+            }
             Spacer(Modifier.width(6.dp))
             Text(
                 text = state.deviceName,
                 style = MaterialTheme.typography.labelMedium.copy(
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 11.5.sp
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 11.sp,
+                    letterSpacing = (-0.1).sp
                 ),
                 color = White100,
                 maxLines = 1,
@@ -621,12 +638,12 @@ private fun CompactConnectedContent(state: DynamicIslandState.Connected) {
             )
         }
 
-        // Right: Shield icon
+        // Right: Live shield icon
         Icon(
             imageVector = Icons.Outlined.Shield,
             contentDescription = null,
-            tint = VoltGreen,
-            modifier = Modifier.size(12.dp)
+            tint = VoltGreen.copy(alpha = 0.8f),
+            modifier = Modifier.size(11.dp)
         )
     }
 }
@@ -704,44 +721,46 @@ private fun CompactTransferContent(state: DynamicIslandState.Transferring) {
     }
 }
 
-/** Compact Success Pill */
+/** Compact Success Pill — volt check + detail (never wraps) */
 @Composable
 private fun CompactSuccessContent(state: DynamicIslandState.Success) {
     Row(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 11.dp),
+            .padding(horizontal = 10.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Left: Check circle + Transfer label (strictly single-line, never wraps)
+        // Left: Check in volt pill + label
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.weight(1f, fill = false)
         ) {
             Box(
                 modifier = Modifier
-                    .size(20.dp)
+                    .size(18.dp)
                     .clip(CircleShape)
-                    .background(VoltGreen),
+                    .background(
+                        brush = Brush.linearGradient(listOf(VoltGreen, Color(0xFFE8FF60)))
+                    ),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = Icons.Filled.Check,
                     contentDescription = null,
-                    tint = ActionVoltText,
-                    modifier = Modifier.size(12.dp)
+                    tint = Color(0xFF0A0A0C),
+                    modifier = Modifier.size(11.dp)
                 )
             }
 
-            Spacer(Modifier.width(8.dp))
+            Spacer(Modifier.width(7.dp))
 
             Text(
-                text = "Transfer",
+                text = "Done",
                 style = MaterialTheme.typography.labelMedium.copy(
                     fontWeight = FontWeight.Bold,
-                    fontSize = 11.5.sp,
-                    letterSpacing = 0.2.sp
+                    fontSize = 11.sp,
+                    letterSpacing = 0.1.sp
                 ),
                 color = White100,
                 maxLines = 1,
@@ -752,9 +771,9 @@ private fun CompactSuccessContent(state: DynamicIslandState.Success) {
 
         Spacer(Modifier.width(8.dp))
 
-        // Right: Saved detail (e.g. "1.0 GB Saved")
+        // Right: detail text (e.g. "1.0 GB Saved")
         Text(
-            text = state.detail.ifEmpty { "1.0 GB Saved" },
+            text = state.detail.ifEmpty { "Saved" },
             style = MaterialTheme.typography.labelSmall.copy(
                 fontWeight = FontWeight.Bold,
                 fontSize = 11.sp,
@@ -1015,7 +1034,7 @@ private fun ExpandedTransferContent(
     }
 }
 
-/** Expanded Live Activity Card for Connected Device — matches ExpandedSuccessContent layout & sizing */
+/** Expanded Live Activity Card for Connected Device — Hardware Handshake Confirmed */
 @Composable
 private fun ExpandedConnectedContent(
     state: DynamicIslandState.Connected,
@@ -1023,127 +1042,346 @@ private fun ExpandedConnectedContent(
     onCollapse: () -> Unit
 ) {
     val context = LocalContext.current
-    Row(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 20.dp, vertical = 14.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
+
+    // Ambient volt glow pulsing in background
+    val infiniteTransition = rememberInfiniteTransition(label = "connected_glow")
+    val glowAlpha by infiniteTransition.animateFloat(
+        initialValue = 0.06f,
+        targetValue = 0.14f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1800, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "glow_alpha"
+    )
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        // Atmospheric ambient glow behind icon
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            drawCircle(
+                brush = Brush.radialGradient(
+                    colors = listOf(
+                        Color(0xFFC1F800).copy(alpha = glowAlpha),
+                        Color.Transparent
+                    ),
+                    center = Offset(size.width * 0.18f, size.height * 0.5f),
+                    radius = size.height * 1.1f
+                ),
+                radius = size.height * 1.1f,
+                center = Offset(size.width * 0.18f, size.height * 0.5f)
+            )
+        }
+
         Row(
-            modifier = Modifier.weight(1f, fill = false),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 18.dp, vertical = 13.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
+            // Left: Specular device icon badge
             Box(
                 modifier = Modifier
-                    .size(42.dp)
-                    .clip(CircleShape)
-                    .background(VoltGreen),
+                    .size(58.dp)
+                    .clip(RoundedCornerShape(18.dp))
+                    .background(
+                        brush = Brush.verticalGradient(
+                            listOf(
+                                Color(0xFF1E2116),
+                                Color(0xFF131412)
+                            )
+                        )
+                    )
+                    .border(
+                        width = 0.8.dp,
+                        brush = Brush.verticalGradient(
+                            0.0f to VoltGreen.copy(alpha = 0.45f),
+                            0.6f to VoltGreen.copy(alpha = 0.10f),
+                            1.0f to Color.Transparent
+                        ),
+                        shape = RoundedCornerShape(18.dp)
+                    ),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = if (state.isDesktop) Icons.Outlined.Laptop else Icons.Outlined.Smartphone,
                     contentDescription = null,
-                    tint = ActionVoltText,
-                    modifier = Modifier.size(24.dp)
+                    tint = VoltGreen,
+                    modifier = Modifier.size(28.dp)
                 )
             }
+
             Spacer(Modifier.width(14.dp))
-            Column {
+
+            // Center: Device info column
+            Column(modifier = Modifier.weight(1f)) {
+                // Monospace platform eyebrow (Warp-style)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    PulsingBeaconDot(size = 5.dp, pulseColor = SignalGreen)
+                    Text(
+                        text = state.platform.uppercase(),
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            fontSize = 9.sp,
+                            letterSpacing = 1.3.sp,
+                            fontWeight = FontWeight.Medium
+                        ),
+                        color = VoltGreen.copy(alpha = 0.7f),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+                Spacer(Modifier.height(3.dp))
                 Text(
                     text = state.deviceName,
-                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = (-0.3).sp
+                    ),
                     color = White100,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
+                Spacer(Modifier.height(2.dp))
+                // Route metadata in monospace
                 Text(
-                    text = "Connected Successfully • ${state.platform}",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = White60,
+                    text = state.route,
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        fontSize = 10.sp,
+                        letterSpacing = 0.3.sp
+                    ),
+                    color = White40,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
             }
-        }
 
-        Spacer(Modifier.width(12.dp))
+            Spacer(Modifier.width(10.dp))
 
-        Box(
-            modifier = Modifier
-                .clip(RoundedCornerShape(10.dp))
-                .background(VoltGlassLight)
-                .border(0.8.dp, VoltBorder, RoundedCornerShape(10.dp))
-                .clickable {
-                    try {
-                        com.homeport.app.util.SoundManager.getInstance(context).playTap()
-                    } catch (_: Exception) {}
-                    onActionClick?.invoke() ?: onCollapse()
-                }
-                .padding(horizontal = 14.dp, vertical = 7.dp)
-        ) {
-            Text(
-                text = "Explore",
-                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                color = VoltGreen
-            )
+            // Right: Volt CTA pill (gradient)
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(
+                        brush = Brush.horizontalGradient(
+                            listOf(VoltGreen, Color(0xFFE8FF60))
+                        )
+                    )
+                    .clickable {
+                        try {
+                            com.homeport.app.util.SoundManager.getInstance(context).playTap()
+                        } catch (_: Exception) {}
+                        onActionClick?.invoke() ?: onCollapse()
+                    }
+                    .padding(horizontal = 14.dp, vertical = 8.dp)
+            ) {
+                Text(
+                    text = "Explore",
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 11.sp,
+                        letterSpacing = 0.2.sp
+                    ),
+                    color = Color(0xFF0A0A0C)
+                )
+            }
         }
     }
 }
 
-/** Expanded Success Content */
+/** Expanded Success Content — transfer completion with premium atmospheric treatment */
 @Composable
 private fun ExpandedSuccessContent(
     state: DynamicIslandState.Success,
     onActionClick: (() -> Unit)?,
     onCollapse: () -> Unit
 ) {
-    Row(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 20.dp, vertical = 14.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
+    val context = LocalContext.current
+
+    // Radial glow animation
+    val infiniteTransition = rememberInfiniteTransition(label = "success_glow")
+    val glowAlpha by infiniteTransition.animateFloat(
+        initialValue = 0.08f,
+        targetValue = 0.18f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1600, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "success_glow_alpha"
+    )
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        // Volt glow behind check icon
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            drawCircle(
+                brush = Brush.radialGradient(
+                    colors = listOf(
+                        Color(0xFFC1F800).copy(alpha = glowAlpha),
+                        Color.Transparent
+                    ),
+                    center = Offset(size.width * 0.18f, size.height * 0.5f),
+                    radius = size.height * 1.0f
+                ),
+                radius = size.height * 1.0f,
+                center = Offset(size.width * 0.18f, size.height * 0.5f)
+            )
+        }
+
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 18.dp, vertical = 13.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Left: check icon in frosted glass pill
             Box(
                 modifier = Modifier
-                    .size(42.dp)
-                    .clip(CircleShape)
-                    .background(VoltGreen),
+                    .size(58.dp)
+                    .clip(RoundedCornerShape(18.dp))
+                    .background(
+                        brush = Brush.verticalGradient(
+                            listOf(
+                                Color(0xFF1E2116),
+                                Color(0xFF131412)
+                            )
+                        )
+                    )
+                    .border(
+                        width = 0.8.dp,
+                        brush = Brush.verticalGradient(
+                            0.0f to VoltGreen.copy(alpha = 0.50f),
+                            0.7f to VoltGreen.copy(alpha = 0.12f),
+                            1.0f to Color.Transparent
+                        ),
+                        shape = RoundedCornerShape(18.dp)
+                    ),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = Icons.Filled.Check,
                     contentDescription = null,
-                    tint = ActionVoltText,
-                    modifier = Modifier.size(24.dp)
+                    tint = VoltGreen,
+                    modifier = Modifier.size(26.dp)
                 )
             }
+
             Spacer(Modifier.width(14.dp))
-            Column {
+
+            // Center: message + detail
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "TRANSFER COMPLETE",
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        fontSize = 9.sp,
+                        letterSpacing = 1.3.sp,
+                        fontWeight = FontWeight.Medium
+                    ),
+                    color = VoltGreen.copy(alpha = 0.7f),
+                    maxLines = 1
+                )
+                Spacer(Modifier.height(3.dp))
                 Text(
                     text = state.message,
-                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                    color = White100
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = (-0.3).sp
+                    ),
+                    color = White100,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
+                Spacer(Modifier.height(2.dp))
                 Text(
                     text = state.detail.ifEmpty { "Air-gapped transfer completed" },
-                    style = MaterialTheme.typography.bodySmall,
-                    color = White60
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        fontSize = 10.sp,
+                        letterSpacing = 0.3.sp
+                    ),
+                    color = White40,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
-        }
 
-        Box(
-            modifier = Modifier
-                .clip(RoundedCornerShape(10.dp))
-                .background(VoltGlassLight)
-                .border(0.8.dp, VoltBorder, RoundedCornerShape(10.dp))
-                .clickable { onActionClick?.invoke() ?: onCollapse() }
-                .padding(horizontal = 12.dp, vertical = 7.dp)
-        ) {
-            Text("Done", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = VoltGreen)
+            Spacer(Modifier.width(8.dp))
+
+            // Right: action buttons
+            Column(
+                verticalArrangement = Arrangement.spacedBy(6.dp),
+                horizontalAlignment = Alignment.End
+            ) {
+                // "Open" — only shown when we have a file path (received file)
+                if (state.filePath != null) {
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(
+                                brush = Brush.horizontalGradient(
+                                    listOf(VoltGreen, Color(0xFFE8FF60))
+                                )
+                            )
+                            .clickable {
+                                try {
+                                    com.homeport.app.util.SoundManager.getInstance(context).playTap()
+                                } catch (_: Exception) {}
+                                // Open the received file with the system viewer
+                                try {
+                                    val file = java.io.File(state.filePath)
+                                    val uri = androidx.core.content.FileProvider.getUriForFile(
+                                        context,
+                                        "${context.packageName}.fileprovider",
+                                        file
+                                    )
+                                    val mime = context.contentResolver.getType(uri) ?: "*/*"
+                                    val intent = android.content.Intent(android.content.Intent.ACTION_VIEW)
+                                        .setDataAndType(uri, mime)
+                                        .addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                    context.startActivity(android.content.Intent.createChooser(intent, "Open with"))
+                                } catch (e: Exception) {
+                                    android.util.Log.w("Island", "Cannot open file: ${e.message}")
+                                    onActionClick?.invoke()
+                                }
+                            }
+                            .padding(horizontal = 14.dp, vertical = 7.dp)
+                    ) {
+                        Text(
+                            text = "Open",
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 11.sp
+                            ),
+                            color = Color(0xFF0A0A0C)
+                        )
+                    }
+                }
+
+                // "Done" — always present, collapses the island
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(VoltGlassLight)
+                        .border(0.8.dp, VoltBorder, RoundedCornerShape(10.dp))
+                        .clickable {
+                            try {
+                                com.homeport.app.util.SoundManager.getInstance(context).playCollapse()
+                            } catch (_: Exception) {}
+                            onCollapse()
+                        }
+                        .padding(horizontal = 12.dp, vertical = 7.dp)
+                ) {
+                    Text(
+                        text = "Done",
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 11.sp
+                        ),
+                        color = VoltGreen
+                    )
+                }
+            }
         }
     }
 }
@@ -1364,7 +1602,13 @@ fun CoolDynamicIslandHost(
             // Check if a transfer just completed
             val recentCompleted = activeTransfers.firstOrNull { it.status == TransferStatus.COMPLETED }
             if (recentCompleted != null && controllerState is DynamicIslandState.Transferring) {
-                DynamicIslandController.showSuccess("Transfer Complete", formatFileSize(recentCompleted.fileSize), autoCollapseMs = 1800L)
+                DynamicIslandController.showSuccess(
+                    message = "Transfer Complete",
+                    detail = formatFileSize(recentCompleted.fileSize),
+                    filePath = if (recentCompleted.direction == TransferDirection.UPLOAD) null
+                               else recentCompleted.localFilePath,
+                    autoCollapseMs = 1800L
+                )
                 delay(4000L)
                 // 3-5 seconds after completion, if no new transfer active, revert process icon quietly to normal connected icon
                 val isTransferStillActive = client.activeTransfers.value.any { it.status == TransferStatus.ACTIVE }

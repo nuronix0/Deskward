@@ -107,13 +107,13 @@ fun OnboardingScreen(onFinish: () -> Unit) {
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     Image(
-                        painter = painterResource(id = R.drawable.deskward_logo),
-                        contentDescription = "DESKWARD",
+                        painter = painterResource(id = R.drawable.portal_logo),
+                        contentDescription = "Portal",
                         modifier = Modifier.size(28.dp),
                         contentScale = ContentScale.Fit
                     )
                     Text(
-                        text = "DESKWARD",
+                        text = "PORTAL",
                         style = MaterialTheme.typography.titleSmall.copy(
                             fontWeight = FontWeight.ExtraBold,
                             letterSpacing = 2.sp,
@@ -551,89 +551,6 @@ private fun QrPairingVisualMockup() {
     }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// IntroScreen — Full Pitch Black (#000000) Cinematic Launch Screen
-// Center: 3D Wormhole Portal Logo (deskward_logo.png) with gentle breathing green aura
-// Below: Aligned DESKWΛRD Wordmark (deskward_wordmark.png)
-// ─────────────────────────────────────────────────────────────────────────────
-@Composable
-fun IntroScreen(onIntroComplete: () -> Unit) {
-    var contentVisible by remember { mutableStateOf(false) }
-    val infiniteTransition = rememberInfiniteTransition(label = "intro_glow")
-    val pulseGlow by infiniteTransition.animateFloat(
-        initialValue = 0.20f,
-        targetValue = 0.52f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(1800, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "glow_alpha"
-    )
-
-    LaunchedEffect(Unit) {
-        delay(120)
-        contentVisible = true
-        delay(1800) // Display cinematic intro for ~1.8s
-        onIntroComplete()
-    }
-
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.Black), // Full pitch black as requested
-        contentAlignment = Alignment.Center
-    ) {
-        // Soft pulsing ambient Volt Green aura behind logo
-        Canvas(modifier = Modifier.size(240.dp)) {
-            drawCircle(
-                brush = Brush.radialGradient(
-                    colors = listOf(
-                        Color(0xFFC1F800).copy(alpha = pulseGlow),
-                        Color(0xFFC1F800).copy(alpha = 0.08f),
-                        Color.Transparent
-                    ),
-                    center = Offset(size.width / 2, size.height / 2),
-                    radius = size.width / 2
-                ),
-                radius = size.width / 2
-            )
-        }
-
-        AnimatedVisibility(
-            visible = contentVisible,
-            enter = fadeIn(tween(600)) + scaleIn(tween(600, easing = FastOutSlowInEasing), initialScale = 0.90f),
-            exit = fadeOut(tween(350))
-        ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                // Small Logo at center (~88dp)
-                Image(
-                    painter = painterResource(id = R.drawable.deskward_logo),
-                    contentDescription = "Deskward Logo",
-                    modifier = Modifier.size(88.dp),
-                    contentScale = ContentScale.Fit
-                )
-
-                Spacer(Modifier.height(24.dp))
-
-                // Under it: The name DESKWARD like attached example (with Volt Green chevron)
-                Image(
-                    painter = painterResource(id = R.drawable.deskward_wordmark),
-                    contentDescription = "DESKWARD",
-                    modifier = Modifier.width(235.dp),
-                    contentScale = ContentScale.Fit
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun SplashScreen(onSplashComplete: () -> Unit) {
-    IntroScreen(onIntroComplete = onSplashComplete)
-}
 
 @Composable
 fun WelcomeScreen(

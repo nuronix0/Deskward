@@ -29,7 +29,7 @@ export async function renderSettings() {
       ]
     },
     {
-      label: 'About DESKWARD',
+      label: 'About Portal',
       items: [
         { icon: SVG_ICONS.application, label: 'Version', value: '1.0.0 (Production Core)', action: null },
         { icon: SVG_ICONS.document, label: 'Open Source', value: 'MIT License', action: 'link' },

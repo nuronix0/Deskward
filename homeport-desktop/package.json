@@ -1,8 +1,8 @@
 {
   "name": "homeport-desktop",
-  "productName": "DESKWARD",
+  "productName": "Portal",
   "version": "1.0.0",
-  "description": "DESKWARD — Cross-device private P2P file network (Desktop)",
+  "description": "Portal — Cross-device private P2P file network (Desktop)",
   "main": "dist/main/main.js",
   "scripts": {
     "dev": "concurrently \"tsc -w --project tsconfig.main.json\" \"tsc -w --project tsconfig.renderer.json\" \"wait-on dist/main/main.js && electron .\"",
@@ -11,13 +11,12 @@
     "pack": "npm run build && electron-builder --win"
   },
   "keywords": [
-    "deskward",
-    "homeport",
+    "portal",
     "p2p",
     "filesharing",
     "electron"
   ],
-  "author": "DESKWARD Team",
+  "author": "Portal Team",
   "license": "MIT",
   "devDependencies": {
     "@types/node": "^22.0.0",
@@ -36,8 +35,8 @@
     "ws": "^8.21.3"
   },
   "build": {
-    "appId": "com.homeport.desktop",
-    "productName": "HOMEPORT",
+    "appId": "com.portal.desktop",
+    "productName": "Portal",
     "win": {
       "target": "nsis",
       "icon": "assets/icon.ico"

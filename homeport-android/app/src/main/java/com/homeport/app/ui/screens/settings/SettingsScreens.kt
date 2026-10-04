@@ -28,7 +28,7 @@ import com.homeport.app.ui.theme.*
 @Composable
 fun SettingsScreen(onBack: () -> Unit, onOpenOnboarding: () -> Unit = {}) {
     val context = androidx.compose.ui.platform.LocalContext.current
-    val prefs = remember { context.getSharedPreferences("deskward_prefs", android.content.Context.MODE_PRIVATE) }
+    val prefs = remember { context.getSharedPreferences("portal_prefs", android.content.Context.MODE_PRIVATE) }
     var showOnboarding by remember {
         mutableStateOf(prefs.getBoolean("pref_show_onboarding", false))
     }
@@ -135,7 +135,7 @@ fun SettingsScreen(onBack: () -> Unit, onOpenOnboarding: () -> Unit = {}) {
                     SettingItem("Start on Boot", Icons.Outlined.PowerSettingsNew, "Off", null),
                 ),
                 "Help" to listOf(
-                    SettingItem("About Deskward", Icons.Outlined.Info, "v1.0.0", null),
+                    SettingItem("About Portal", Icons.Outlined.Info, "v1.0.0", null),
                     @Suppress("DEPRECATION")
                     SettingItem("Help & Support", Icons.Outlined.HelpOutline, null, null),
                     SettingItem("Diagnostics", Icons.Outlined.BugReport, null, null),
@@ -169,7 +169,7 @@ fun SettingsScreen(onBack: () -> Unit, onOpenOnboarding: () -> Unit = {}) {
                     ) {
                         Icon(Icons.Outlined.DeleteForever, "Reset", tint = StatusError, modifier = Modifier.size(20.dp))
                         Spacer(Modifier.width(12.dp))
-                        Text("Reset Deskward", style = MaterialTheme.typography.bodyLarge,
+                        Text("Reset Portal", style = MaterialTheme.typography.bodyLarge,
                             color = StatusError, modifier = Modifier.weight(1f))
                     }
                 }

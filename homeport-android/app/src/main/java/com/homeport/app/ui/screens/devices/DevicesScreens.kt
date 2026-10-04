@@ -879,7 +879,39 @@ fun PairDeviceScreen(
     val nfcManager = remember { com.homeport.app.network.NfcPairingManager.getInstance(context) }
     val nfcAvailability by nfcManager.availability.collectAsState()
     val nfcState       by nfcManager.state.collectAsState()
+
+    // Start NFC advertising (HCE / NDEF-push) while the NFC tab is visible so
+    // another phone can tap THIS device and read the pairing URL automatically.
+    val activity = context as? android.app.Activity
+    LaunchedEffect(mode, nfcAvailability) {
+        if (mode == PairMode.NFC_TAP &&
+            nfcAvailability == com.homeport.app.network.NfcAvailability.AVAILABLE &&
+            activity != null
+        ) {
+            // Get this device's LAN IP from the running mesh server (or NetworkUtils fallback)
+            val ip   = meshServerManager.getServerIp()
+                ?: com.homeport.app.network.NetworkUtils.getBestLocalIpv4(context)
+                ?: "0.0.0.0"
+            val port = 51234
+            // Generate a fresh one-time secret for this NFC session
+            val secret = (1..8).map { "ABCDEFGHJKLMNPQRSTUVWXYZ23456789".random() }.joinToString("")
+            // Register secret on mesh server so the incoming HELLO is accepted
+            meshServerManager.setActivePairingSecret(secret)
+            nfcManager.startNfcAdvertising(activity, ip, port, secret)
+        } else if (activity != null) {
+            nfcManager.stopNfcAdvertising(activity)
+        }
+    }
+
+    // Stop advertising when the screen exits
+    androidx.compose.runtime.DisposableEffect(Unit) {
+        onDispose {
+            if (activity != null) nfcManager.stopNfcAdvertising(activity)
+        }
+    }
+
     Scaffold(
+
         containerColor = Background,
         topBar = {
             Column(modifier = Modifier.background(Background)) {
@@ -2504,7 +2536,7 @@ fun RevokeDeviceDialog(
         },
         text = {
             Text(
-                "Remove $deviceName from trusted devices? It will no longer be able to connect to DESKWARD.",
+                "Remove $deviceName from trusted devices? It will no longer be able to connect to Portal.",
                 color = White60
             )
         },

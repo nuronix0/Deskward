@@ -15,7 +15,7 @@ import androidx.navigation.compose.rememberNavController
 import com.homeport.app.network.HomePortClient
 import com.homeport.app.network.MeshForegroundService
 import com.homeport.app.network.NfcPairingManager
-import com.homeport.app.ui.screens.onboarding.SplashScreen
+import com.homeport.app.ui.screens.onboarding.IntroScreen
 import com.homeport.app.ui.screens.onboarding.WelcomeScreen
 import com.homeport.app.ui.theme.Background
 import com.homeport.app.ui.theme.HomePortTheme
@@ -97,28 +97,28 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun HomePortApp() {
     val context = androidx.compose.ui.platform.LocalContext.current
-    val prefs = remember { context.getSharedPreferences("deskward_prefs", android.content.Context.MODE_PRIVATE) }
+    val prefs = remember { context.getSharedPreferences("portal_prefs", android.content.Context.MODE_PRIVATE) }
+    val showOnboarding = remember { prefs.getBoolean("pref_show_onboarding", true) }
     var appState by remember { mutableStateOf(AppState.INTRO) }
     val navController = rememberNavController()
 
     when (appState) {
         AppState.INTRO -> {
-            com.homeport.app.ui.screens.onboarding.IntroScreen(
-                onIntroComplete = { 
-                    val showOnboarding = prefs.getBoolean("pref_show_onboarding", true)
-                    appState = if (showOnboarding) AppState.ONBOARDING else AppState.MAIN 
+            IntroScreen(
+                onIntroComplete = {
+                    appState = if (showOnboarding) AppState.ONBOARDING else AppState.MAIN
                 }
             )
         }
         AppState.ONBOARDING -> {
             WelcomeScreen(
-                onGetStarted = { 
+                onGetStarted = {
                     prefs.edit().putBoolean("pref_show_onboarding", false).apply()
-                    appState = AppState.MAIN 
+                    appState = AppState.MAIN
                 },
-                onSignIn = { 
+                onSignIn = {
                     prefs.edit().putBoolean("pref_show_onboarding", false).apply()
-                    appState = AppState.MAIN 
+                    appState = AppState.MAIN
                 }
             )
         }

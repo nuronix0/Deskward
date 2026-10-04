@@ -22,7 +22,7 @@ import android.net.Uri
 import android.provider.Settings
 
 private const val TAG = "MeshForegroundService"
-private const val CHANNEL_ID = "deskward_mesh_channel"
+private const val CHANNEL_ID = "portal_mesh_channel"
 private const val NOTIFICATION_ID = 9182
 
 /**
@@ -66,7 +66,7 @@ class MeshForegroundService : Service() {
         try {
             val powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
             if (wakeLock == null) {
-                wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "Deskward::MeshWakeLock").apply {
+                wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "Portal::MeshWakeLock").apply {
                     setReferenceCounted(false)
                 }
             }
@@ -78,7 +78,7 @@ class MeshForegroundService : Service() {
             val wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
             if (wifiLock == null) {
                 @Suppress("DEPRECATION")
-                wifiLock = wifiManager.createWifiLock(WifiManager.WIFI_MODE_FULL_HIGH_PERF, "Deskward::MeshWifiLock").apply {
+                wifiLock = wifiManager.createWifiLock(WifiManager.WIFI_MODE_FULL_HIGH_PERF, "Portal::MeshWifiLock").apply {
                     setReferenceCounted(false)
                 }
             }
@@ -138,7 +138,7 @@ class MeshForegroundService : Service() {
             isSender && isReceiver -> "Dual Mesh Active · Serving $senderClientCount peer(s) & Connected to $receiverPeerName"
             isSender -> "Serving storage to $senderClientCount receiver(s) · Screen-off active"
             isReceiver -> "Connected to $receiverPeerName · Screen-off link active"
-            else -> "Deskward P2P Mesh Active · Screen-off link ready"
+            else -> "Portal P2P Mesh Active · Screen-off link ready"
         }
 
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -149,7 +149,7 @@ class MeshForegroundService : Service() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 CHANNEL_ID,
-                "Deskward Mesh Service",
+                "Portal Mesh Service",
                 NotificationManager.IMPORTANCE_LOW
             ).apply {
                 description = "Keeps peer-to-peer data connection active when screen is turned off"
@@ -172,7 +172,7 @@ class MeshForegroundService : Service() {
         )
 
         return NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle("Deskward P2P Mesh")
+            .setContentTitle("Portal P2P Mesh")
             .setContentText(contentText)
             .setSmallIcon(android.R.drawable.stat_notify_sync)
             .setOngoing(true)
