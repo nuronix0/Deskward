@@ -2,7 +2,7 @@
   <img src="portal_logo.png" width="120" height="120" alt="Portal Logo" style="border-radius: 28px;" />
 </p>
 
-<h1 align="center">⚡ PORTAL</h1>
+<h1 align="center">PORTAL</h1>
 
 <p align="center">
   <b>Zero-Cloud, High-Speed Hardware Bridge & Local Mesh File Transfer Ecosystem for Android & Desktop</b>
