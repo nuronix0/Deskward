@@ -37,7 +37,8 @@ motion-primitives/
 NEW DESIGN/
 open-design/
 references/
-screenshots/
+/screenshots/
+!docs/screenshots/
 scripts/
 skills/
 SmartIsland/

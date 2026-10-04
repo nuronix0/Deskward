@@ -22,6 +22,7 @@
 
 ## 📖 Table of Contents
 - [Overview](#-overview)
+- [Application Showcase](#-application-showcase)
 - [Project Objectives](#-project-objectives)
 - [Core Features](#-core-features)
 - [Dynamic Smart Island](#-dynamic-smart-island)
@@ -38,6 +39,26 @@
 **Portal** is an ultra-fast, completely air-gapped cross-device file sharing and synchronization platform engineered specifically for local networks and hardware bridges. By establishing direct peer-to-peer TCP streams over Wi-Fi, local mesh configurations, and instant NFC touch handshakes, Portal eliminates cloud servers, file size ceilings, bandwidth throttling, and privacy vulnerabilities.
 
 Built from the ground up using **Kotlin** and **100% Jetpack Compose** on Android, paired with an **Electron & TypeScript** desktop hub, Portal unites raw hardware-level throughput with a cyber aesthetic featuring fluid interactive Dynamic Islands, ambient haptics, and live progress indicators.
+
+---
+
+## 📱 Application Showcase
+
+<div align="center">
+
+| **01. Brand Splash Screen** | **02. Home Dashboard & HUD** | **03. Pairing Code Setup** |
+| :---: | :---: | :---: |
+| <a href="docs/screenshots/01_splash_screen.jpg"><img src="docs/screenshots/01_splash_screen.jpg" width="240" alt="Brand Splash Screen" /></a> | <a href="docs/screenshots/02_home_dashboard.jpg"><img src="docs/screenshots/02_home_dashboard.jpg" width="240" alt="Home Dashboard" /></a> | <a href="docs/screenshots/03_pairing_code_generate.jpg"><img src="docs/screenshots/03_pairing_code_generate.jpg" width="240" alt="Pairing Code Setup" /></a> |
+| *Minimalist hourglass identity & launch canvas* | *Speedometer gauge, mesh telemetry & quick scan* | *One-time secure token creation with optional password* |
+
+<br />
+
+| **04. Active 6-Digit Code** | **05. Dynamic QR Pairing** | **06. System & Navigation Hub** |
+| :---: | :---: | :---: |
+| <a href="docs/screenshots/04_pairing_code_active.jpg"><img src="docs/screenshots/04_pairing_code_active.jpg" width="240" alt="Active 6-Digit Code" /></a> | <a href="docs/screenshots/05_pairing_qr_code.jpg"><img src="docs/screenshots/05_pairing_qr_code.jpg" width="240" alt="Dynamic QR Pairing" /></a> | <a href="docs/screenshots/06_navigation_more_menu.jpg"><img src="docs/screenshots/06_navigation_more_menu.jpg" width="240" alt="System & Navigation Hub" /></a> |
+| *Live 120s circular countdown with auto-refresh* | *End-to-end encrypted QR with local socket telemetry* | *Transfers badge (2), shared folders & device settings* |
+
+</div>
 
 ---
 
@@ -148,6 +169,7 @@ graph TD
 HOMEPORT/
 ├── Portal.apk                # Pre-compiled production release APK
 ├── portal_logo.png           # Official brand logo
+├── docs/screenshots/         # High-resolution production application screenshots
 ├── homeport-android/         # Android Native Jetpack Compose App
 │   ├── app/
 │   │   ├── src/main/java/com/homeport/app/
